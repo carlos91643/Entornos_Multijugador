@@ -11,6 +11,7 @@ public class Player extends Spaceship {
 	private final int playerId;
 	private final String shipType;
 	private String nombreNave;
+	private String colorNave;
 
 	public Player(int playerId, WebSocketSession session) {
 		this.playerId = playerId;
@@ -23,6 +24,13 @@ public class Player extends Spaceship {
 	}
 	public String getNombreNave() {
 		return nombreNave;
+	}
+	
+	public void setColorNave(String c) {
+		colorNave = c;
+	}
+	public String getColorNave() {
+		return colorNave;
 	}
 
 	public int getPlayerId() {

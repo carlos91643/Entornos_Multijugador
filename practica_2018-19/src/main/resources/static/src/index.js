@@ -64,22 +64,39 @@ window.onload = function() {
 						game.global.myPlayer.image.y = player.posY
 						game.global.myPlayer.image.angle = player.facingAngle
 						game.global.myPlayer.vida = player.vida;
+						////////////////////////////////
+						pintarVidas(game.global.myPlayer,player);
+						///////////////////////////////
+						text.x = player.posX -10;
+						text.y = player.posY -35;
 						
-						game.global.myPlayer.liveSprite.x = player.posX - 15;
-						game.global.myPlayer.liveSprite.y = player.posY
-						game.global.myPlayer.liveSprite.angle = player.facingAngle
-						game.global.myPlayer.liveSprite.anchor.setTo(0.1, 0.1);
 						console.log(game.global.myPlayer.vida);
 					} else {
-						if (typeof game.global.otherPlayers[player.id] == 'undefined') { //Si hay otros jugadores distintos al de mi id que no estan definidos, lo creamos. 
+						if (typeof game.global.otherPlayers[player.id] == 'undefined') { //Si hay otros jugadores distintos al de mi id que no estan definidos, lo creamos.
 							game.global.otherPlayers[player.id] = {
-									image : game.add.sprite(player.posX, player.posY, 'spacewar', player.shipType)
+									image : game.add.sprite(player.posX, player.posY, 'spacewar', player.shipType),
+									vida : player.vida,
+									liveSprite : game.add.sprite(0, 0, 'live'),
+									liveSprite2 : game.add.sprite(0, 0, 'live'),
+									liveSprite3 : game.add.sprite(0, 0, 'live'),
+									texto : game.add.text(0, 0, player.nombre, style) //tocaaaaaar
 							}
 							game.global.otherPlayers[player.id].image.anchor.setTo(0.5, 0.5)
+							game.global.otherPlayers[player.id].liveSprite.scale.setTo(0.02, 0.02)
+							game.global.otherPlayers[player.id].liveSprite2.scale.setTo(0.02, 0.02)
+							game.global.otherPlayers[player.id].liveSprite3.scale.setTo(0.02, 0.02)
+							
 						} else { //Si el jugador ya existe
 							game.global.otherPlayers[player.id].image.x = player.posX
 							game.global.otherPlayers[player.id].image.y = player.posY
 							game.global.otherPlayers[player.id].image.angle = player.facingAngle
+							game.global.otherPlayers[player.id].vida = player.vida;
+							
+							pintarVidas(game.global.otherPlayers[player.id],player);
+							
+							game.global.otherPlayers[player.id].texto.x = player.posX -10;
+							game.global.otherPlayers[player.id].texto.y = player.posY -35;
+							//game.global.otherPlayers[player.id].texto.fill = player.color;
 						}
 					}
 				}
@@ -116,6 +133,43 @@ window.onload = function() {
 		default :
 			console.dir(msg)
 			break
+		}
+	}
+	
+	function pintarVidas(a,jugador){
+		switch (jugador.vida){
+			case 1:
+				a.liveSprite.x = jugador.posX - 15;
+				a.liveSprite.y = jugador.posY -25;
+				a.liveSprite.scale.setTo(0.05,0.05);
+				
+				a.liveSprite2.visible = false;
+				a.liveSprite3.visible = false;
+				break;
+			case 2:
+				a.liveSprite.x = jugador.posX - 15;
+				a.liveSprite.y = jugador.posY -25;
+				a.liveSprite.scale.setTo(0.05,0.05);
+				
+				a.liveSprite2.x = jugador.posX - 5;
+				a.liveSprite2.y = jugador.posY -25;
+				a.liveSprite2.scale.setTo(0.05,0.05);
+				
+				a.liveSprite3.visible = false;
+				break;
+			case 3:
+				a.liveSprite.x = jugador.posX - 15;
+				a.liveSprite.y = jugador.posY -25;
+				a.liveSprite.scale.setTo(0.05,0.05);
+				
+				a.liveSprite2.x = jugador.posX - 5;
+				a.liveSprite2.y = jugador.posY -25;
+				a.liveSprite2.scale.setTo(0.05,0.05);
+				
+				a.liveSprite3.x = jugador.posX + 5;
+				a.liveSprite3.y = jugador.posY -25;
+				a.liveSprite3.scale.setTo(0.05,0.05);
+				break;
 		}
 	}
 

@@ -45,6 +45,7 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 			case "JOIN":
 				//System.out.println(node.get("params").asText());
 				player.setNombreNave(node.get("params").asText());
+				player.setColorNave(node.get("color").asText());
 				msg.put("event", "JOIN");
 				msg.put("id", player.getPlayerId());
 				msg.put("shipType", player.getShipType());
