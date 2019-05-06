@@ -11,6 +11,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class WebsocketGameHandler extends TextWebSocketHandler {
 
 	private SpacewarGame game = SpacewarGame.INSTANCE;
@@ -18,10 +21,13 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 	private ObjectMapper mapper = new ObjectMapper();
 	private AtomicInteger playerId = new AtomicInteger(0);
 	private AtomicInteger projectileId = new AtomicInteger(0);
-
+	/////
+	private ConcurrentHashMap<WebSocketSession, Player> sessions = new ConcurrentHashMap<>();
+	
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		Player player = new Player(playerId.incrementAndGet(), session);
+		sessions.putIfAbsent(session, player);
 		session.getAttributes().put(PLAYER_ATTRIBUTE, player);
 		
 		ObjectNode msg = mapper.createObjectNode();
@@ -68,6 +74,16 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 					game.addProjectile(projectile.getId(), projectile);
 				}
 				break;
+			case "CHAT":
+				System.out.println(node.get("params").asText());
+				msg.put("event", "CHAT");
+				msg.put("nombre", node.get("name").asText());
+				msg.put("mensaje", node.get("params").asText());
+				msg.put("colorsito", node.get("color").asText());
+				for(Player p : sessions.values()) {
+					p.getSession().sendMessage(new TextMessage(msg.toString()));
+				}
+				break;
 			default:
 				break;
 			}
@@ -81,6 +97,7 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
 		Player player = (Player) session.getAttributes().get(PLAYER_ATTRIBUTE);
+		sessions.remove(session,player);
 		game.removePlayer(player);
 
 		ObjectNode msg = mapper.createObjectNode();

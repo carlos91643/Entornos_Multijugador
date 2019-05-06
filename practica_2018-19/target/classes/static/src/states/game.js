@@ -4,7 +4,7 @@ Spacewar.gameState = function(game) {
 	this.numStars = 100 // Should be canvas size dependant
 	this.maxProjectiles = 800 // 8 per player
 }
-var text;
+//var text;
 Spacewar.gameState.prototype = {
 
 	init : function() {
@@ -44,15 +44,16 @@ Spacewar.gameState.prototype = {
 		game.global.myPlayer.image.anchor.setTo(0.5, 0.5)
 		
 		game.global.myPlayer.liveSprite = game.add.sprite(0, 0, 'live');
-		game.global.myPlayer.liveSprite.scale.setTo(0.02,0.02);
+		game.global.myPlayer.liveSprite.scale.setTo(0.02, 0.02);
 		
 		game.global.myPlayer.liveSprite2 = game.add.sprite(0, 0, 'live');
-		game.global.myPlayer.liveSprite.scale.setTo(0.02,0.02);
+		game.global.myPlayer.liveSprite2.scale.setTo(0.02, 0.02);
 		
 		game.global.myPlayer.liveSprite3 = game.add.sprite(0, 0, 'live');
-		game.global.myPlayer.liveSprite.scale.setTo(0.02,0.02);
+		game.global.myPlayer.liveSprite3.scale.setTo(0.02, 0.02);
 		
-		text = game.add.text(0, 0, namePlayer, style);
+		game.global.myPlayer.text = game.add.text(0, 0, namePlayer, style);
+		game.global.myPlayer.text.style.fill = color;
 	},
 
 	create : function() {
@@ -82,10 +83,6 @@ Spacewar.gameState.prototype = {
 	},
 
 	update : function() {
-		
-		game.global.myPlayer.liveSprite.scale.setTo(0.02,0.02);
-		game.global.myPlayer.liveSprite2.scale.setTo(0.02,0.02);
-		game.global.myPlayer.liveSprite3.scale.setTo(0.02,0.02);
 		
 		let msg = new Object()
 		msg.event = 'UPDATE MOVEMENT'

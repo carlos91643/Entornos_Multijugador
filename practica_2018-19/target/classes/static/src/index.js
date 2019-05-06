@@ -1,4 +1,15 @@
 window.onload = function() {
+	
+	var Console = {};
+
+	Console.log = (function(message) { //Consola para chat
+		var console = document.getElementById('console');
+		var p = document.createElement('p');
+		p.style.wordWrap = 'break-word';
+		p.innerHTML = message;
+		console.appendChild(p);
+
+	});
 
 	game = new Phaser.Game(1024, 600, Phaser.AUTO, 'gameDiv')
 
@@ -52,6 +63,9 @@ window.onload = function() {
 					name : msg.room //Nombre de la habitacion o mapa
 			}
 			break
+		case 'CHAT':
+			Console.log(msg.nombre.fontcolor(msg.colorsito) + " : " + msg.mensaje);
+			break
 		case 'GAME STATE UPDATE' :
 			if (game.global.DEBUG_MODE) {
 				console.log('[DEBUG] GAME STATE UPDATE message recieved')
@@ -67,12 +81,12 @@ window.onload = function() {
 						////////////////////////////////
 						pintarVidas(game.global.myPlayer,player);
 						///////////////////////////////
-						text.x = player.posX -10;
-						text.y = player.posY -35;
+						game.global.myPlayer.text.x = player.posX -10;
+						game.global.myPlayer.text.y = player.posY -35;
 						
 						console.log(game.global.myPlayer.vida);
 					} else {
-						if (typeof game.global.otherPlayers[player.id] == 'undefined') { //Si hay otros jugadores distintos al de mi id que no estan definidos, lo creamos.
+						if (typeof game.global.otherPlayers[player.id] == 'undefined' && player.nombre !== 'undefined') { //Si hay otros jugadores distintos al de mi id que no estan definidos, lo creamos.
 							game.global.otherPlayers[player.id] = {
 									image : game.add.sprite(player.posX, player.posY, 'spacewar', player.shipType),
 									vida : player.vida,
@@ -86,17 +100,20 @@ window.onload = function() {
 							game.global.otherPlayers[player.id].liveSprite2.scale.setTo(0.02, 0.02)
 							game.global.otherPlayers[player.id].liveSprite3.scale.setTo(0.02, 0.02)
 							
+							game.global.otherPlayers[player.id].texto.style.fill = player.color;
+							
 						} else { //Si el jugador ya existe
-							game.global.otherPlayers[player.id].image.x = player.posX
-							game.global.otherPlayers[player.id].image.y = player.posY
-							game.global.otherPlayers[player.id].image.angle = player.facingAngle
-							game.global.otherPlayers[player.id].vida = player.vida;
-							
-							pintarVidas(game.global.otherPlayers[player.id],player);
-							
-							game.global.otherPlayers[player.id].texto.x = player.posX -10;
-							game.global.otherPlayers[player.id].texto.y = player.posY -35;
-							//game.global.otherPlayers[player.id].texto.fill = player.color;
+							if(player.nombre !== 'undefined'){
+								game.global.otherPlayers[player.id].image.x = player.posX
+								game.global.otherPlayers[player.id].image.y = player.posY
+								game.global.otherPlayers[player.id].image.angle = player.facingAngle
+								game.global.otherPlayers[player.id].vida = player.vida;
+								
+								pintarVidas(game.global.otherPlayers[player.id],player);
+								
+								game.global.otherPlayers[player.id].texto.x = player.posX -10;
+								game.global.otherPlayers[player.id].texto.y = player.posY -35;
+							}
 						}
 					}
 				}
@@ -141,7 +158,7 @@ window.onload = function() {
 			case 1:
 				a.liveSprite.x = jugador.posX - 15;
 				a.liveSprite.y = jugador.posY -25;
-				a.liveSprite.scale.setTo(0.05,0.05);
+				//a.liveSprite.scale.setTo(0.01,0.01);
 				
 				a.liveSprite2.visible = false;
 				a.liveSprite3.visible = false;
@@ -149,29 +166,44 @@ window.onload = function() {
 			case 2:
 				a.liveSprite.x = jugador.posX - 15;
 				a.liveSprite.y = jugador.posY -25;
-				a.liveSprite.scale.setTo(0.05,0.05);
+				//a.liveSprite.scale.setTo(0.01,0.01);
 				
 				a.liveSprite2.x = jugador.posX - 5;
 				a.liveSprite2.y = jugador.posY -25;
-				a.liveSprite2.scale.setTo(0.05,0.05);
+				//a.liveSprite2.scale.setTo(0.01,0.01);
 				
 				a.liveSprite3.visible = false;
 				break;
 			case 3:
 				a.liveSprite.x = jugador.posX - 15;
 				a.liveSprite.y = jugador.posY -25;
-				a.liveSprite.scale.setTo(0.05,0.05);
+				//a.liveSprite.scale.setTo(0.01,0.01);
 				
 				a.liveSprite2.x = jugador.posX - 5;
 				a.liveSprite2.y = jugador.posY -25;
-				a.liveSprite2.scale.setTo(0.05,0.05);
+				//a.liveSprite2.scale.setTo(0.01,0.01);
 				
 				a.liveSprite3.x = jugador.posX + 5;
 				a.liveSprite3.y = jugador.posY -25;
-				a.liveSprite3.scale.setTo(0.05,0.05);
+				//a.liveSprite3.scale.setTo(0.01,0.01);
 				break;
 		}
 	}
+	
+	$(document).ready(function(){
+	    $('#send-btn').click(function() { //boton de enviar del chat
+	        var object = {
+	        	event: 'CHAT',
+	            params: $('#message').val(),
+	            name: namePlayer,
+	            color : color
+	        }
+
+	        game.global.socket.send(JSON.stringify(object));
+
+	        $('#message').val('');
+	    });
+	})
 
 	// PHASER SCENE CONFIGURATOR
 	game.state.add('bootState', Spacewar.bootState)

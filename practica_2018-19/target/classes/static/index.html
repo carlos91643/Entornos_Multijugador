@@ -7,6 +7,8 @@
 <!-- Título de la página -->
 <title>SpaceWar!</title>
 
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+
 <!-- Cargamos los archivos JS -->
 <script src="scripts/phaser.min.js"></script>
 <script src="src/states/boot.js"></script>
@@ -22,5 +24,14 @@
 <body>
 	<!-- div donde ubicaremos el juego -->
 	<div id="gameDiv"></div>
+	<!-- console.log -->
+	<div id="console-container">
+		
+		<div id="console"></div>
+			
+		<input type="text" name="message" id="message" placeholder="Message" maxlength="80" style="width: 60%" />
+		<button id="send-btn">Send</button>
+	</div>
+	<!-- console.log -->
 </body>
 </html>
