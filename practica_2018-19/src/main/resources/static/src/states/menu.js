@@ -2,15 +2,26 @@ Spacewar.menuState = function(game) {
 
 }
 var namePlayer;
+var nameSala;
 var color = "#ffffff";
-var style = { font: "bold 10px Arial", fill: color, boundsAlignH: "center", boundsAlignV: "middle" };
+var style;
 var colores= ["#E10000", "#EA00C3", "#10C5F5", "#10F510"];
- function pedirNombre(){
+var empezarBtn= false;
+var crearBtn= true;
+var unirseBtn= true;
+var enPartida=false;
+
+function pedirNombre(){
 	do
 	{
 		namePlayer = prompt("Inserta el nombre de tu nave: ", "nave1"); //esta función nos permite pedir al usuario un nombre, que se guardará en la variable namePlayer.
 	} while(name == "nave1"|| name == "null");
 	color = colores[Math.floor(Math.random() * 4)];
+	style = { font: "bold 10px Arial", fill: color, boundsAlignH: "center", boundsAlignV: "middle" };
+}
+
+function nomSala(){
+	
 }
  
 Spacewar.menuState.prototype = {
@@ -40,7 +51,7 @@ Spacewar.menuState.prototype = {
 				params : namePlayer,
 				color : color
 			}
-			game.global.socket.send(JSON.stringify(message))
+		game.global.socket.send(JSON.stringify(message))
 	},
 
 	update : function() {

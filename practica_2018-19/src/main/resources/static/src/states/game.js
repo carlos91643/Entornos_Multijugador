@@ -13,7 +13,7 @@ Spacewar.gameState.prototype = {
 		}
 	},
 
-	preload : function() {
+	preload : function() {	
 		// We create a procedural starfield background
 		for (var i = 0; i < this.numStars; i++) {
 			let sprite = game.add.sprite(game.world.randomX,
@@ -54,6 +54,9 @@ Spacewar.gameState.prototype = {
 		
 		game.global.myPlayer.text = game.add.text(0, 0, namePlayer, style);
 		game.global.myPlayer.text.style.fill = color;
+		
+		
+		console.log("preload image");
 	},
 
 	create : function() {
@@ -83,34 +86,35 @@ Spacewar.gameState.prototype = {
 	},
 
 	update : function() {
-		
-		let msg = new Object()
-		msg.event = 'UPDATE MOVEMENT'
-
-		msg.movement = {
-			thrust : false,
-			brake : false,
-			rotLeft : false,
-			rotRight : false
+		if(enPartida){
+			let msg = new Object()
+			msg.event = 'UPDATE MOVEMENT'
+	
+			msg.movement = {
+				thrust : false,
+				brake : false,
+				rotLeft : false,
+				rotRight : false
+			}
+	
+			msg.bullet = false
+	
+			if (this.wKey.isDown)
+				msg.movement.thrust = true;
+			if (this.sKey.isDown)
+				msg.movement.brake = true;
+			if (this.aKey.isDown)
+				msg.movement.rotLeft = true;
+			if (this.dKey.isDown)
+				msg.movement.rotRight = true;
+			if (this.spaceKey.isDown) {
+				msg.bullet = this.fireBullet()
+			}
+	
+			if (game.global.DEBUG_MODE) {
+				console.log("[DEBUG] Sending UPDATE MOVEMENT message to server")
+			}
+			game.global.socket.send(JSON.stringify(msg))
 		}
-
-		msg.bullet = false
-
-		if (this.wKey.isDown)
-			msg.movement.thrust = true;
-		if (this.sKey.isDown)
-			msg.movement.brake = true;
-		if (this.aKey.isDown)
-			msg.movement.rotLeft = true;
-		if (this.dKey.isDown)
-			msg.movement.rotRight = true;
-		if (this.spaceKey.isDown) {
-			msg.bullet = this.fireBullet()
-		}
-
-		if (game.global.DEBUG_MODE) {
-			console.log("[DEBUG] Sending UPDATE MOVEMENT message to server")
-		}
-		game.global.socket.send(JSON.stringify(msg))
 	}
 }

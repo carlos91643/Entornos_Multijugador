@@ -16,13 +16,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class WebsocketGameHandler extends TextWebSocketHandler {
 
-	private SpacewarGame game = SpacewarGame.INSTANCE;
+	////////private SpacewarGame game = SpacewarGame.INSTANCE;
 	private static final String PLAYER_ATTRIBUTE = "PLAYER";
 	private ObjectMapper mapper = new ObjectMapper();
 	private AtomicInteger playerId = new AtomicInteger(0);
 	private AtomicInteger projectileId = new AtomicInteger(0);
 	/////
 	private ConcurrentHashMap<WebSocketSession, Player> sessions = new ConcurrentHashMap<>();
+	private ConcurrentHashMap<String, Sala> salas = new ConcurrentHashMap<>();
 	
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -30,13 +31,13 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 		sessions.putIfAbsent(session, player);
 		session.getAttributes().put(PLAYER_ATTRIBUTE, player);
 		
-		ObjectNode msg = mapper.createObjectNode();
-		msg.put("event", "JOIN");
-		msg.put("id", player.getPlayerId());
-		msg.put("shipType", player.getShipType());
-		player.getSession().sendMessage(new TextMessage(msg.toString()));
+		//ObjectNode msg = mapper.createObjectNode();
+		//msg.put("event", "JOIN");
+		//msg.put("id", player.getPlayerId());
+		//msg.put("shipType", player.getShipType());
+		//player.getSession().sendMessage(new TextMessage(msg.toString()));
 		
-		game.addPlayer(player);
+		////////game.addPlayer(player);
 	}
 
 	@Override
@@ -56,13 +57,20 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 				msg.put("id", player.getPlayerId());
 				msg.put("shipType", player.getShipType());
 				msg.put("nombreNave", player.getNombreNave());
-				player.getSession().sendMessage(new TextMessage(msg.toString()));
+				//player.getSession().sendMessage(new TextMessage(msg.toString()));
 				System.out.println(player.getNombreNave());
 				break;
-			case "JOIN ROOM":
+			case "CREAR":
+				Sala salita = new Sala(node.get("params").asText());
+				salita.addPlayer(player.getPlayerId(), player);
+				salas.putIfAbsent(node.get("params").asText(), salita);
+				
 				msg.put("event", "NEW ROOM");
-				msg.put("room", "GLOBAL");
 				player.getSession().sendMessage(new TextMessage(msg.toString()));
+				
+				System.out.println(node.get("params").asText());
+				System.out.println("enviamos new room");
+				
 				break;
 			case "UPDATE MOVEMENT":
 				player.loadMovement(node.path("movement").get("thrust").asBoolean(),
@@ -71,8 +79,13 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 						node.path("movement").get("rotRight").asBoolean());
 				if (node.path("bullet").asBoolean()) {
 					Projectile projectile = new Projectile(player, this.projectileId.incrementAndGet());
-					game.addProjectile(projectile.getId(), projectile);
+					////////////game.addProjectile(projectile.getId(), projectile);
 				}
+				break;
+			case "EMPEZAR":
+				System.out.println("EMPEZAMOS PERTIDA");
+				
+				salas.get(node.get("params").asText()).empezar();
 				break;
 			case "CHAT":
 				System.out.println(node.get("params").asText());
@@ -97,12 +110,12 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
 		Player player = (Player) session.getAttributes().get(PLAYER_ATTRIBUTE);
-		sessions.remove(session,player);
-		game.removePlayer(player);
+		sessions.remove(session);
+		////////////////game.removePlayer(player);
 
 		ObjectNode msg = mapper.createObjectNode();
 		msg.put("event", "REMOVE PLAYER");
 		msg.put("id", player.getPlayerId());
-		game.broadcast(msg.toString());
+		///////////////game.broadcast(msg.toString());
 	}
 }

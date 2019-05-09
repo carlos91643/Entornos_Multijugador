@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class SpacewarGame {
 
-	public final static SpacewarGame INSTANCE = new SpacewarGame();
+	////public final static SpacewarGame INSTANCE = new SpacewarGame();
 
 	private final static int FPS = 30;
 	private final static long TICK_DELAY = 1000 / FPS;
@@ -33,16 +33,16 @@ public class SpacewarGame {
 	private Map<Integer, Projectile> projectiles = new ConcurrentHashMap<>();
 	private AtomicInteger numPlayers = new AtomicInteger();
 
-	private SpacewarGame() {
+	public SpacewarGame() {
 
 	}
 
-	public void addPlayer(Player player) {
+	public synchronized void addPlayer(Player player) {
 		players.put(player.getSession().getId(), player);
 
 		int count = numPlayers.getAndIncrement();
 		if (count == 0) {
-			this.startGameLoop();
+			//this.startGameLoop();
 		}
 	}
 
@@ -50,12 +50,12 @@ public class SpacewarGame {
 		return players.values();
 	}
 
-	public void removePlayer(Player player) {
+	public synchronized void removePlayer(Player player) {
 		players.remove(player.getSession().getId());
 
 		int count = this.numPlayers.decrementAndGet();
 		if (count == 0) {
-			this.stopGameLoop();
+			//this.stopGameLoop();
 		}
 	}
 
@@ -72,6 +72,9 @@ public class SpacewarGame {
 	}
 
 	public void startGameLoop() {
+		System.out.println("startGameLoop");
+		
+		
 		scheduler = Executors.newScheduledThreadPool(1);
 		scheduler.scheduleAtFixedRate(() -> tick(), TICK_DELAY, TICK_DELAY, TimeUnit.MILLISECONDS);
 	}
@@ -95,6 +98,9 @@ public class SpacewarGame {
 	}
 
 	private void tick() {
+		//System.out.println("tick");
+		
+		
 		ObjectNode json = mapper.createObjectNode();
 		ArrayNode arrayNodePlayers = mapper.createArrayNode();
 		ArrayNode arrayNodeProjectiles = mapper.createArrayNode();
@@ -162,6 +168,10 @@ public class SpacewarGame {
 			json.putPOJO("projectiles", arrayNodeProjectiles);
 
 			this.broadcast(json.toString());
+			
+			
+			
+			System.out.println(json);
 		} catch (Throwable ex) {
 
 		}

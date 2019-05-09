@@ -5,7 +5,7 @@ window.onload = function() {
 	Console.log = (function(message) { //Consola para chat
 		var console = document.getElementById('console');
 		var p = document.createElement('p');
-		p.style.wordWrap = 'break-word';
+		p.style.wordWrap = 'break-word'; 
 		p.innerHTML = message;
 		console.appendChild(p);
 
@@ -62,17 +62,29 @@ window.onload = function() {
 			game.global.myPlayer.room = {
 					name : msg.room //Nombre de la habitacion o mapa
 			}
+			empezarBtn = true;
 			break
 		case 'CHAT':
 			Console.log(msg.nombre.fontcolor(msg.colorsito) + " : " + msg.mensaje);
 			break
 		case 'GAME STATE UPDATE' :
+			console.log("update");
+			
+			
 			if (game.global.DEBUG_MODE) {
 				console.log('[DEBUG] GAME STATE UPDATE message recieved')
 				console.dir(msg)
 			}
 			if (typeof game.global.myPlayer.image !== 'undefined') { //Si la imagen del jugador no está creada
+				
+				console.log("llega al for");
+				
+				
 				for (var player of msg.players) {
+					
+					console.log("actualiza los jugadores");
+					
+					
 					if (game.global.myPlayer.id == player.id) { //Si la id que estamos usando coincide con la id del array de jugadores
 						game.global.myPlayer.image.x = player.posX
 						game.global.myPlayer.image.y = player.posY
@@ -100,7 +112,7 @@ window.onload = function() {
 							game.global.otherPlayers[player.id].liveSprite2.scale.setTo(0.02, 0.02)
 							game.global.otherPlayers[player.id].liveSprite3.scale.setTo(0.02, 0.02)
 							
-							game.global.otherPlayers[player.id].texto.style.fill = player.color;
+							game.global.otherPlayers[player.id].texto.addColor(player.color,0);
 							
 						} else { //Si el jugador ya existe
 							if(player.nombre !== 'undefined'){
@@ -203,6 +215,46 @@ window.onload = function() {
 
 	        $('#message').val('');
 	    });
+	    
+	    $('#crear-btn').click(function() {
+	    	if(crearBtn){
+		    	do
+		    	{
+		    		nameSala = prompt("Inserta el nombre de tu Sala: ", "Sala1"); //esta función nos permite pedir al usuario un nombre, que se guardará en la variable namePlayer.
+		    	} while(name == "null");
+		        var object = {
+		        	event: 'CREAR',
+		            params: nameSala
+		        }
+	
+		        game.global.socket.send(JSON.stringify(object));
+	
+		        $('#message').val('');
+		        
+		        crearBtn = false;
+	    	}
+	    });
+	    
+	    $('#empezar-btn').click(function() { 
+	    	if(empezarBtn){
+		        var object = {
+		        	event: 'EMPEZAR',
+		            params: nameSala
+		        }
+	
+		        game.global.socket.send(JSON.stringify(object));
+	
+		        $('#message').val('');
+		        
+		        empezarBtn = false;
+		        enPartida = true;
+		        
+		        game.state.add('gameState', Spacewar.gameState)
+		        
+		        console.log("enviamos empezar")
+	    	}
+	        
+	    });
 	})
 
 	// PHASER SCENE CONFIGURATOR
@@ -212,7 +264,7 @@ window.onload = function() {
 	game.state.add('lobbyState', Spacewar.lobbyState)
 	game.state.add('matchmakingState', Spacewar.matchmakingState)
 	game.state.add('roomState', Spacewar.roomState)
-	game.state.add('gameState', Spacewar.gameState)
+	//game.state.add('gameState', Spacewar.gameState) //////////////////////////
 
 	game.state.start('bootState')
 

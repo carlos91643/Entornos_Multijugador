@@ -19,19 +19,46 @@
 <script src="src/states/room.js"></script>
 <script src="src/states/game.js"></script>
 <script src="src/index.js"></script>
+
+<link
+      href="https://fonts.googleapis.com/css?family=Montserrat:600"
+      rel="stylesheet"
+/>
+<link rel="stylesheet" href= "src/style.css">
 </head>
 
 <body>
-	<!-- div donde ubicaremos el juego -->
-	<div id="gameDiv"></div>
-	<!-- console.log -->
-	<div id="console-container">
-		
-		<div id="console"></div>
-			
-		<input type="text" name="message" id="message" placeholder="Message" maxlength="80" style="width: 60%" />
-		<button id="send-btn">Send</button>
-	</div>
-	<!-- console.log -->
+	<div id="game">
+      <div id="botons">
+        <button id="crear-btn">Crear</button>
+        <button id="buscar-btn">Match-Making</button>
+        <button id="unirse-btn">Unirse</button>
+      </div>
+
+      <!-- div donde ubicaremos el juego -->
+      <div id="gameDiv"></div>
+
+      <div id="chat">
+        <button id="empezar-btn">Empezar</button>
+
+        <!-- console.log -->
+        <div id="console-container">
+          <div id="console"></div>
+          <div id="input-send">
+            <input
+              type="text"
+              name="message"
+              id="message"
+              placeholder="Message"
+              maxlength="80"
+            />
+            <button id="send-btn">Send</button>
+          </div>
+        </div>
+        <!-- console.log -->
+
+        <button id="salir-btn">Salir</button>
+      </div>
+    </div>
 </body>
 </html>
