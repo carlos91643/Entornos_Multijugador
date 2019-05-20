@@ -39,7 +39,7 @@ window.onload = function() {
 		}
 	}
 	
-	game.global.socket.onmessage = (message) => {
+	game.global.socket.onmessage = (message) => { //recibe los mensajes del server (JAVA)
 		var msg = JSON.parse(message.data)
 		
 		switch (msg.event) {
@@ -54,6 +54,16 @@ window.onload = function() {
 				console.log('[DEBUG] ID assigned to player: ' + game.global.myPlayer.id)
 			}
 			break
+		case 'UNIRSE':
+			console.log("Nombre no valido")
+			unirse();
+			break
+		case 'LISTO':
+			game.state.start('gameState')
+			enPartida = true;
+			Console.log("¡¡¡TODOS LISTOS!!!")
+			Console.log("¡¡¡GOOO!!!")
+			break
 		case 'NEW ROOM' : //Una partida como tal, configuracion del espacio de juego, nº jugadores, etc... Es donde tenemos que hacer toda la chicha
 			if (game.global.DEBUG_MODE) {
 				console.log('[DEBUG] NEW ROOM message recieved')
@@ -62,28 +72,28 @@ window.onload = function() {
 			game.global.myPlayer.room = {
 					name : msg.room //Nombre de la habitacion o mapa
 			}
-			empezarBtn = true;
+			nameSala = msg.room
+			empezarBtn = true;			//provisional.
+			
+			if (msg.duplicado == "yes"){
+				Console.log("La sala ya exixtía")
+				Console.log("Se crea la Sala : " + nameSala)
+			}else{
+				Console.log("Se crea la Sala : " + nameSala)
+			}
 			break
 		case 'CHAT':
 			Console.log(msg.nombre.fontcolor(msg.colorsito) + " : " + msg.mensaje);
 			break
 		case 'GAME STATE UPDATE' :
-			console.log("update");
-			
-			
+
 			if (game.global.DEBUG_MODE) {
 				console.log('[DEBUG] GAME STATE UPDATE message recieved')
 				console.dir(msg)
 			}
 			if (typeof game.global.myPlayer.image !== 'undefined') { //Si la imagen del jugador no está creada
 				
-				console.log("llega al for");
-				
-				
 				for (var player of msg.players) {
-					
-					console.log("actualiza los jugadores");
-					
 					
 					if (game.global.myPlayer.id == player.id) { //Si la id que estamos usando coincide con la id del array de jugadores
 						game.global.myPlayer.image.x = player.posX
@@ -96,7 +106,19 @@ window.onload = function() {
 						game.global.myPlayer.text.x = player.posX -10;
 						game.global.myPlayer.text.y = player.posY -35;
 						
-						console.log(game.global.myPlayer.vida);
+						game.global.myPlayer.push.x = player.posX -10;
+						game.global.myPlayer.push.y = player.posY -45;
+						
+						if(player.push > 0){
+							game.global.myPlayer.push.setText(player.push);﻿﻿
+						}
+						
+						if(game.global.myPlayer.vida == 0){
+							game.global.myPlayer.image.destroy() 
+							delete game.global.myPlayer
+							enPartida = false;
+						}
+						
 					} else {
 						if (typeof game.global.otherPlayers[player.id] == 'undefined' && player.nombre !== 'undefined') { //Si hay otros jugadores distintos al de mi id que no estan definidos, lo creamos.
 							game.global.otherPlayers[player.id] = {
@@ -126,6 +148,10 @@ window.onload = function() {
 								game.global.otherPlayers[player.id].texto.x = player.posX -10;
 								game.global.otherPlayers[player.id].texto.y = player.posY -35;
 							}
+						}
+						if(game.global.otherPlayers[player.id].vida == 0){
+							game.global.otherPlayers[msg.id].image.destroy()
+							delete game.global.otherPlayers[msg.id]
 						}
 					}
 				}
@@ -157,12 +183,25 @@ window.onload = function() {
 				console.log('[DEBUG] REMOVE PLAYER message recieved')
 				console.dir(msg.players)
 			}
+			game.global.otherPlayers[msg.id].liveSprite.destroy()
+			game.global.otherPlayers[msg.id].liveSprite2.destroy()
+			game.global.otherPlayers[msg.id].liveSprite3.destroy()
+			game.global.otherPlayers[msg.id].texto.destroy()
 			game.global.otherPlayers[msg.id].image.destroy() //Busca el id del jugador en el array, destruimos su posicion en el array y borramos su imagen del mapa.
 			delete game.global.otherPlayers[msg.id]
 		default :
 			console.dir(msg)
 			break
 		}
+	}
+	
+	function meVoy(){
+		game.global.myPlayer.liveSprite.destroy()
+		game.global.myPlayer.liveSprite2.destroy()
+		game.global.myPlayer.liveSprite3.destroy()
+		game.global.myPlayer.texto.destroy()
+		game.global.myPlayer.image.destroy()
+		delete game.global.myPlayer
 	}
 	
 	function pintarVidas(a,jugador){
@@ -202,36 +241,62 @@ window.onload = function() {
 		}
 	}
 	
+	function unirse(){
+		do
+    	{
+    		nameSala = prompt("Inserta el nombre de la Sala: ", "Sala1");
+    	} while(name == "null");
+        var object = {
+        	event: 'UNIRSE',
+            params: nameSala
+        }
+
+        game.global.socket.send(JSON.stringify(object));
+	}
+	
 	$(document).ready(function(){
 	    $('#send-btn').click(function() { //boton de enviar del chat
-	        var object = {
-	        	event: 'CHAT',
-	            params: $('#message').val(),
-	            name: namePlayer,
-	            color : color
-	        }
-
-	        game.global.socket.send(JSON.stringify(object));
-
-	        $('#message').val('');
+	    	if (enSala){
+		        var object = {
+		        	event: 'CHAT',
+		            params: $('#message').val(),
+		            name: namePlayer,
+		            color : color,
+		            sala : nameSala
+		        }
+	
+		        game.global.socket.send(JSON.stringify(object));
+	
+		        $('#message').val('');
+	    	}
 	    });
 	    
 	    $('#crear-btn').click(function() {
 	    	if(crearBtn){
 		    	do
 		    	{
-		    		nameSala = prompt("Inserta el nombre de tu Sala: ", "Sala1"); //esta función nos permite pedir al usuario un nombre, que se guardará en la variable namePlayer.
-		    	} while(name == "null");
+		    		nameSala = prompt("Inserta el nombre de tu Sala: ", "Sala1");
+		    	} while(nameSala == "null" || nameSala == " ");
 		        var object = {
 		        	event: 'CREAR',
 		            params: nameSala
 		        }
 	
 		        game.global.socket.send(JSON.stringify(object));
-	
-		        $('#message').val('');
 		        
 		        crearBtn = false;
+		        unirseBtn = false;
+		        enSala = true;
+	    	}
+	    });
+	    
+	    $('#unirse-btn').click(function() {
+	    	if(unirseBtn){
+	    		unirse();
+		        
+		        crearBtn = false;
+		        unirseBtn = false;
+		        enSala = true;
 	    	}
 	    });
 	    
@@ -243,15 +308,35 @@ window.onload = function() {
 		        }
 	
 		        game.global.socket.send(JSON.stringify(object));
-	
-		        $('#message').val('');
 		        
 		        empezarBtn = false;
-		        enPartida = true;
 		        
-		        game.state.add('gameState', Spacewar.gameState)
+		        //game.state.start('gameState')
 		        
 		        console.log("enviamos empezar")
+	    	}
+	        
+	    });
+	    
+	    $('#salir-btn').click(function() { 
+	    	if(enSala){
+		        var object = {
+		        	event: 'SALIR',
+		            params: nameSala
+		        }
+		        
+		        meVoy()
+	
+		        game.global.socket.send(JSON.stringify(object));
+		        
+		        enSala = false;
+		        empezarBtn = false;
+		        enPartida = false;
+		        
+		        crearBtn = true;
+		        unirseBtn = true;
+		        
+		        game.state.start('roomState')
 	    	}
 	        
 	    });
@@ -264,7 +349,7 @@ window.onload = function() {
 	game.state.add('lobbyState', Spacewar.lobbyState)
 	game.state.add('matchmakingState', Spacewar.matchmakingState)
 	game.state.add('roomState', Spacewar.roomState)
-	//game.state.add('gameState', Spacewar.gameState) //////////////////////////
+	game.state.add('gameState', Spacewar.gameState) //////////////////////////
 
 	game.state.start('bootState')
 

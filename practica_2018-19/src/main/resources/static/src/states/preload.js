@@ -18,6 +18,8 @@ Spacewar.preloadState.prototype = {
 				'assets/atlas/explosion.json',
 				Phaser.Loader.TEXTURE_ATLAS_JSON_HASH)
 		game.load.image('live', 'assets/images/live.png')
+		game.load.image('push', 'assets/images/push.png')
+		
 	},
 
 	create : function() { //Primero se cargan las imagenes en el preload, y luego ya cambia al estado menuState

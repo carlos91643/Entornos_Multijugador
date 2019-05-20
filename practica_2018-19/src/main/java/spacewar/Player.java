@@ -12,6 +12,15 @@ public class Player extends Spaceship {
 	private final String shipType;
 	private String nombreNave;
 	private String colorNave;
+	private String salaActual;
+
+	public String getSalaActual() {
+		return salaActual;
+	}
+
+	public void setSalaActual(String salaActual) {
+		this.salaActual = salaActual;
+	}
 
 	public Player(int playerId, WebSocketSession session) {
 		this.playerId = playerId;

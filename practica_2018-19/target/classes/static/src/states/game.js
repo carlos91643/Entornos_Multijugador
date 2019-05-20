@@ -55,6 +55,8 @@ Spacewar.gameState.prototype = {
 		game.global.myPlayer.text = game.add.text(0, 0, namePlayer, style);
 		game.global.myPlayer.text.style.fill = color;
 		
+		game.global.myPlayer.push = game.add.text(0,0, "100", style);
+		game.global.myPlayer.push.style.fill = color;﻿
 		
 		console.log("preload image");
 	},
@@ -71,16 +73,17 @@ Spacewar.gameState.prototype = {
 			}
 		}
 
-		this.wKey = game.input.keyboard.addKey(Phaser.Keyboard.W);
-		this.sKey = game.input.keyboard.addKey(Phaser.Keyboard.S);
-		this.aKey = game.input.keyboard.addKey(Phaser.Keyboard.A);
-		this.dKey = game.input.keyboard.addKey(Phaser.Keyboard.D);
-		this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+		this.wKey = game.input.keyboard.addKey(Phaser.Keyboard.UP);
+		this.sKey = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+		this.aKey = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+		this.dKey = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+		this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.CONTROL);
+		this.shiftKey = game.input.keyboard.addKey(Phaser.Keyboard.SHIFT);
 
 		// Stop the following keys from propagating up to the browser
-		game.input.keyboard.addKeyCapture([ Phaser.Keyboard.W,
-				Phaser.Keyboard.S, Phaser.Keyboard.A, Phaser.Keyboard.D,
-				Phaser.Keyboard.SPACEBAR ]);
+		//game.input.keyboard.addKeyCapture([ Phaser.Keyboard.W,
+		//		Phaser.Keyboard.S, Phaser.Keyboard.A, Phaser.Keyboard.D,
+		//		Phaser.Keyboard.SPACEBAR ]);
 
 		game.camera.follow(game.global.myPlayer.image);
 	},
@@ -89,6 +92,8 @@ Spacewar.gameState.prototype = {
 		if(enPartida){
 			let msg = new Object()
 			msg.event = 'UPDATE MOVEMENT'
+				
+			msg.nomSal = nameSala				//me parece que sobra
 	
 			msg.movement = {
 				thrust : false,
@@ -96,7 +101,8 @@ Spacewar.gameState.prototype = {
 				rotLeft : false,
 				rotRight : false
 			}
-	
+			
+			msg.push = false
 			msg.bullet = false
 	
 			if (this.wKey.isDown)
@@ -109,6 +115,9 @@ Spacewar.gameState.prototype = {
 				msg.movement.rotRight = true;
 			if (this.spaceKey.isDown) {
 				msg.bullet = this.fireBullet()
+			}
+			if (this.shiftKey.isDown) {
+				msg.push = true;
 			}
 	
 			if (game.global.DEBUG_MODE) {

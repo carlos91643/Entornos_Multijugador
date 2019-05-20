@@ -19,6 +19,6 @@ Spacewar.roomState.prototype = {
 	},
 
 	update : function() {
-		game.state.start('gameState')
+		//game.state.start('gameState')
 	}
 }

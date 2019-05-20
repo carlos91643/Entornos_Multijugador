@@ -34,7 +34,7 @@ public class SpacewarGame {
 	private AtomicInteger numPlayers = new AtomicInteger();
 
 	public SpacewarGame() {
-
+		//modos de juego
 	}
 
 	public synchronized void addPlayer(Player player) {
@@ -90,23 +90,22 @@ public class SpacewarGame {
 			try {
 				player.getSession().sendMessage(new TextMessage(message.toString()));
 			} catch (Throwable ex) {
-				System.err.println("Execption sending message to player " + player.getSession().getId());
-				ex.printStackTrace(System.err);
+				/*System.err.println("Execption sending message to player " + player.getSession().getId());
+				ex.printStackTrace(System.err);*/
 				this.removePlayer(player);
 			}
 		}
 	}
 
 	private void tick() {
-		//System.out.println("tick");
-		
-		
+
 		ObjectNode json = mapper.createObjectNode();
 		ArrayNode arrayNodePlayers = mapper.createArrayNode();
 		ArrayNode arrayNodeProjectiles = mapper.createArrayNode();
 
 		long thisInstant = System.currentTimeMillis();
 		Set<Integer> bullets2Remove = new HashSet<>();
+		Set<Integer> f = new HashSet<>();
 		boolean removeBullets = false;
 
 		try {
@@ -123,6 +122,7 @@ public class SpacewarGame {
 				jsonPlayer.put("vida", player.getVida());
 				jsonPlayer.put("nombre", player.getNombreNave());
 				jsonPlayer.put("color", player.getColorNave());
+				jsonPlayer.put("push", player.getPropulsion());
 				arrayNodePlayers.addPOJO(jsonPlayer);
 			}
 
@@ -131,9 +131,12 @@ public class SpacewarGame {
 				projectile.applyVelocity2Position();
 
 				// Handle collision
-				for (Player player : getPlayers()) {
+				for (Player player : getPlayers()) {/////////////CONCURRENCIAAAAAAAAAAAAAA!!!!!!!!!!!!!!
 					if ((projectile.getOwner().getPlayerId() != player.getPlayerId()) && player.intersect(projectile)) {
 						// System.out.println("Player " + player.getPlayerId() + " was hit!!!");
+						if(player.muerto()) {
+							f.add(player.getPlayerId());
+						}
 						projectile.setHit(true);
 						break;
 					}
@@ -156,28 +159,28 @@ public class SpacewarGame {
 						jsonProjectile.put("posX", projectile.getPosX());
 						jsonProjectile.put("posY", projectile.getPosY());
 					}
-				}
+			}
 				arrayNodeProjectiles.addPOJO(jsonProjectile);
 			}
 
-			if (removeBullets)
+			if (removeBullets) {
 				this.projectiles.keySet().removeAll(bullets2Remove);
+				this.players.keySet().removeAll(f);
+			}
 
 			json.put("event", "GAME STATE UPDATE");
-			json.putPOJO("players", arrayNodePlayers);
+			json.putPOJO("players", arrayNodePlayers);					////enviarle a los demas qu eha muerto
 			json.putPOJO("projectiles", arrayNodeProjectiles);
 
 			this.broadcast(json.toString());
 			
-			
-			
-			System.out.println(json);
+			//System.out.println(json);
 		} catch (Throwable ex) {
 
 		}
 	}
 
 	public void handleCollision() {
-
+		///
 	}
 }

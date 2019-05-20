@@ -2,7 +2,7 @@ Spacewar.menuState = function(game) {
 
 }
 var namePlayer;
-var nameSala;
+var nameSala = " ";
 var color = "#ffffff";
 var style;
 var colores= ["#E10000", "#EA00C3", "#10C5F5", "#10F510"];
@@ -10,12 +10,13 @@ var empezarBtn= false;
 var crearBtn= true;
 var unirseBtn= true;
 var enPartida=false;
+var enSala = false;
 
 function pedirNombre(){
 	do
 	{
 		namePlayer = prompt("Inserta el nombre de tu nave: ", "nave1"); //esta función nos permite pedir al usuario un nombre, que se guardará en la variable namePlayer.
-	} while(name == "nave1"|| name == "null");
+	} while(namePlayer == "nave1"|| namePlayer == "null");
 	color = colores[Math.floor(Math.random() * 4)];
 	style = { font: "bold 10px Arial", fill: color, boundsAlignH: "center", boundsAlignV: "middle" };
 }
