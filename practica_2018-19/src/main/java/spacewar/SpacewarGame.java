@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class SpacewarGame {
 
-	////public final static SpacewarGame INSTANCE = new SpacewarGame();
+	//// public final static SpacewarGame INSTANCE = new SpacewarGame();
 
 	private final static int FPS = 30;
 	private final static long TICK_DELAY = 1000 / FPS;
@@ -34,7 +34,7 @@ public class SpacewarGame {
 	private AtomicInteger numPlayers = new AtomicInteger();
 
 	public SpacewarGame() {
-		//modos de juego
+		// modos de juego
 	}
 
 	public synchronized void addPlayer(Player player) {
@@ -42,7 +42,7 @@ public class SpacewarGame {
 
 		int count = numPlayers.getAndIncrement();
 		if (count == 0) {
-			//this.startGameLoop();
+			// this.startGameLoop();
 		}
 	}
 
@@ -55,7 +55,7 @@ public class SpacewarGame {
 
 		int count = this.numPlayers.decrementAndGet();
 		if (count == 0) {
-			//this.stopGameLoop();
+			// this.stopGameLoop();
 		}
 	}
 
@@ -73,8 +73,7 @@ public class SpacewarGame {
 
 	public void startGameLoop() {
 		System.out.println("startGameLoop");
-		
-		
+
 		scheduler = Executors.newScheduledThreadPool(1);
 		scheduler.scheduleAtFixedRate(() -> tick(), TICK_DELAY, TICK_DELAY, TimeUnit.MILLISECONDS);
 	}
@@ -90,8 +89,10 @@ public class SpacewarGame {
 			try {
 				player.getSession().sendMessage(new TextMessage(message.toString()));
 			} catch (Throwable ex) {
-				/*System.err.println("Execption sending message to player " + player.getSession().getId());
-				ex.printStackTrace(System.err);*/
+				/*
+				 * System.err.println("Execption sending message to player " +
+				 * player.getSession().getId()); ex.printStackTrace(System.err);
+				 */
 				this.removePlayer(player);
 			}
 		}
@@ -100,17 +101,25 @@ public class SpacewarGame {
 	private void tick() {
 
 		ObjectNode json = mapper.createObjectNode();
+		ObjectNode msg = mapper.createObjectNode();
 		ArrayNode arrayNodePlayers = mapper.createArrayNode();
 		ArrayNode arrayNodeProjectiles = mapper.createArrayNode();
 
 		long thisInstant = System.currentTimeMillis();
 		Set<Integer> bullets2Remove = new HashSet<>();
-		Set<Integer> f = new HashSet<>();
+		Set<String> f = new HashSet<>();
 		boolean removeBullets = false;
+		boolean exitPlayer = false;
 
 		try {
 			// Update players
 			for (Player player : getPlayers()) {
+				if (player.salir) {
+					f.add(player.getSession().getId());
+					exitPlayer = true;
+					player.salir = false;
+				}
+
 				player.calculateMovement();
 
 				ObjectNode jsonPlayer = mapper.createObjectNode();
@@ -131,11 +140,11 @@ public class SpacewarGame {
 				projectile.applyVelocity2Position();
 
 				// Handle collision
-				for (Player player : getPlayers()) {/////////////CONCURRENCIAAAAAAAAAAAAAA!!!!!!!!!!!!!!
+				for (Player player : getPlayers()) {///////////// CONCURRENCIAAAAAAAAAAAAAA!!!!!!!!!!!!!!
 					if ((projectile.getOwner().getPlayerId() != player.getPlayerId()) && player.intersect(projectile)) {
 						// System.out.println("Player " + player.getPlayerId() + " was hit!!!");
-						if(player.muerto()) {
-							f.add(player.getPlayerId());
+						if (player.muerto()) {
+							f.add(player.getSession().getId());
 						}
 						projectile.setHit(true);
 						break;
@@ -159,22 +168,23 @@ public class SpacewarGame {
 						jsonProjectile.put("posX", projectile.getPosX());
 						jsonProjectile.put("posY", projectile.getPosY());
 					}
-			}
+				}
 				arrayNodeProjectiles.addPOJO(jsonProjectile);
 			}
 
-			if (removeBullets) {
+			if (removeBullets || exitPlayer) {
+				System.out.println("ELIMINO JUGADOR");
 				this.projectiles.keySet().removeAll(bullets2Remove);
 				this.players.keySet().removeAll(f);
 			}
 
 			json.put("event", "GAME STATE UPDATE");
-			json.putPOJO("players", arrayNodePlayers);					////enviarle a los demas qu eha muerto
+			json.putPOJO("players", arrayNodePlayers); //// enviarle a los demas qu eha muerto
 			json.putPOJO("projectiles", arrayNodeProjectiles);
 
 			this.broadcast(json.toString());
-			
-			//System.out.println(json);
+			this.broadcast(msg.toString());
+
 		} catch (Throwable ex) {
 
 		}

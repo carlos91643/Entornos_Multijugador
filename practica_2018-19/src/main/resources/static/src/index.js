@@ -114,9 +114,22 @@ window.onload = function() {
 						}
 						
 						if(game.global.myPlayer.vida == 0){
+							game.global.myPlayer.liveSprite.destroy()
+							game.global.myPlayer.liveSprite2.destroy()
+							game.global.myPlayer.liveSprite3.destroy()
+							game.global.myPlayer.text.destroy()
+							game.global.myPlayer.push.destroy()
 							game.global.myPlayer.image.destroy() 
 							delete game.global.myPlayer
-							enPartida = false;
+							
+							enSala = false;
+					        empezarBtn = false;
+					        enPartida = false;
+					        
+					        crearBtn = true;
+					        unirseBtn = true;
+					        
+					        game.state.start('roomState')
 						}
 						
 					} else {
@@ -150,8 +163,12 @@ window.onload = function() {
 							}
 						}
 						if(game.global.otherPlayers[player.id].vida == 0){
-							game.global.otherPlayers[msg.id].image.destroy()
-							delete game.global.otherPlayers[msg.id]
+							game.global.otherPlayers[player.id].liveSprite.destroy()
+							game.global.otherPlayers[player.id].liveSprite2.destroy()
+							game.global.otherPlayers[player.id].liveSprite3.destroy()
+							game.global.otherPlayers[player.id].texto.destroy()
+							game.global.otherPlayers[player.id].image.destroy()
+							delete game.global.otherPlayers[player.id]
 						}
 					}
 				}
@@ -178,7 +195,7 @@ window.onload = function() {
 				}
 			}
 			break
-		case 'REMOVE PLAYER' : //se elimina un jugador, ya sea porque se ha ido de la partida, o porque se ha mierto
+		case 'REMOVE PLAYER' : //se elimina un jugador, ya sea porque se ha ido de la partida
 			if (game.global.DEBUG_MODE) {
 				console.log('[DEBUG] REMOVE PLAYER message recieved')
 				console.dir(msg.players)
@@ -189,19 +206,22 @@ window.onload = function() {
 			game.global.otherPlayers[msg.id].texto.destroy()
 			game.global.otherPlayers[msg.id].image.destroy() //Busca el id del jugador en el array, destruimos su posicion en el array y borramos su imagen del mapa.
 			delete game.global.otherPlayers[msg.id]
+	
 		default :
-			console.dir(msg)
+			//console.dir(msg)
 			break
 		}
 	}
 	
 	function meVoy(){
+        enPartida = false;
 		game.global.myPlayer.liveSprite.destroy()
 		game.global.myPlayer.liveSprite2.destroy()
 		game.global.myPlayer.liveSprite3.destroy()
-		game.global.myPlayer.texto.destroy()
-		game.global.myPlayer.image.destroy()
-		delete game.global.myPlayer
+		game.global.myPlayer.push.destroy()
+		game.global.myPlayer.text.destroy()
+		//game.global.myPlayer.image.destroy()
+		//delete game.global.myPlayer
 	}
 	
 	function pintarVidas(a,jugador){
@@ -322,7 +342,8 @@ window.onload = function() {
 	    	if(enSala){
 		        var object = {
 		        	event: 'SALIR',
-		            params: nameSala
+		            params: nameSala,
+		            id: game.global.myPlayer.id
 		        }
 		        
 		        meVoy()
@@ -331,7 +352,6 @@ window.onload = function() {
 		        
 		        enSala = false;
 		        empezarBtn = false;
-		        enPartida = false;
 		        
 		        crearBtn = true;
 		        unirseBtn = true;

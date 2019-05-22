@@ -11,6 +11,7 @@ public class Spaceship extends SpaceObject {
 	public int vida = 3;
 	public int municion = 10;
 	public int propulsion = 100;
+	public boolean salir = false;
 	
 	
 	public int getMunicion() {
