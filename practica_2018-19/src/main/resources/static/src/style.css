@@ -177,3 +177,47 @@
   background-color: #5db9ef;
   transition: 0.4s ease-in-out;
 }
+
+#controles{
+  display: inline-block;
+    position: absolute;
+    margin-left: -12%;
+}
+
+#modoA-btn {
+  -webkit-box-shadow: 4px 5px 9px -1px rgba(0, 0, 0, 0.75);
+  background-color: #316382;
+  letter-spacing: 2px;
+  color: white;
+  text-transform: uppercase;
+  font-family: "Montserrat", sans-serif;
+  font-size: 20px;
+  width: 200px;
+  height: 50px;
+  cursor: pointer;
+  border-radius: 5px;
+  text-align: center;
+}
+#modoA-btn:hover {
+  background-color: #5db9ef;
+  transition: 0.4s ease-in-out;
+}
+
+#modoB-btn {
+  -webkit-box-shadow: 4px 5px 9px -1px rgba(0, 0, 0, 0.75);
+  background-color: #316382;
+  letter-spacing: 2px;
+  color: white;
+  text-transform: uppercase;
+  font-family: "Montserrat", sans-serif;
+  font-size: 20px;
+  width: 200px;
+  height: 50px;
+  cursor: pointer;
+  border-radius: 5px;
+  text-align: center;
+}
+#modoB-btn:hover {
+  background-color: #5db9ef;
+  transition: 0.4s ease-in-out;
+}

@@ -25,9 +25,13 @@ public class Spaceship extends SpaceObject {
 	public int getPropulsion() {
 		return propulsion;
 	}
+	
+	public void resetVida() {
+		this.vida = 3;
+	}
 
-	public void setPropulsion(int propulsion) {
-		this.propulsion = propulsion;
+	public void resetPropulsion() {
+		this.propulsion = 100;
 	}
 
 	class LastMovement {
@@ -94,7 +98,7 @@ public class Spaceship extends SpaceObject {
 			this.incFacingAngle(SPACESHIP_ROTATION_SPEED);
 		}
 
-		this.applyVelocity2Position();
+		this.applyVelocity2Position2();
 
 		lastMovement = new LastMovement();
 	}
@@ -103,7 +107,7 @@ public class Spaceship extends SpaceObject {
 		return vida;
 	}
 	
-	public boolean muerto() {
+	public synchronized boolean muerto() {
 		if(vida>0) {
 			vida--;
 			if(vida == 0) {

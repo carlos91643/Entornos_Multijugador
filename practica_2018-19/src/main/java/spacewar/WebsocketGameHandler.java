@@ -73,7 +73,7 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 					duplicado = "yes";
 				}
 
-				Sala salita = new Sala(nRoom);
+				Sala salita = new Sala(nRoom, this);
 				salita.addPlayer(player.getPlayerId(), player);
 				salas.putIfAbsent(nRoom, salita);
 
@@ -88,29 +88,39 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 			case "UNIRSE":
 				synchronized (salas) {
 					if (salaExiste(node.get("params").asText())) { // si la sala existe nos unimos a ella si se puede
-						if (salas.get(node.get("params").asText()).isFull()) { // sala llena
-							msg.put("event", "SALA LLENA");
+						if(!salas.get(node.get("params").asText()).isEmpezada()) {// si la partida todavía no ha empezado
+							
+							if (salas.get(node.get("params").asText()).isFull()) { // sala llena
+								msg.put("event", "SALA LLENA");
 
-							// la primera comprobación es de si la partida ha empezado
-							// que hacer cuando la sala está llena y esas cosas
-							System.out.println("Sala llena: " + node.get("params").asText());
+								// la primera comprobación es de si la partida ha empezado
+								// que hacer cuando la sala está llena y esas cosas
+								System.out.println("Sala llena: " + node.get("params").asText());
 
+								player.getSession().sendMessage(new TextMessage(msg.toString()));
+							} else {
+								System.out.println("nos unimos a la sala " + node.get("params").asText());
+
+								salas.get(node.get("params").asText()).addPlayer(player.getPlayerId(), player); // nos
+																												// unimos a
+																												// la sala
+																												// con éxito
+
+								msg.put("event", "CHAT");
+								msg.put("nombre", player.getNombreNave());
+								msg.put("mensaje", "Hey me he unido a esta sala");
+								msg.put("colorsito", player.getColorNave());
+
+								salas.get(node.get("params").asText()).sms(msg.toString());
+							}
+							
+						}else { // la partida ya ha empezado, así que busca otra
+							System.out.println("la sala no existe " + node.get("params").asText());
+
+							msg.put("event", "UNIRSE");
 							player.getSession().sendMessage(new TextMessage(msg.toString()));
-						} else {
-							System.out.println("nos unimos a la sala " + node.get("params").asText());
-
-							salas.get(node.get("params").asText()).addPlayer(player.getPlayerId(), player); // nos
-																											// unimos a
-																											// la sala
-																											// con éxito
-
-							msg.put("event", "CHAT");
-							msg.put("nombre", player.getNombreNave());
-							msg.put("mensaje", "Hey me he unido a esta sala");
-							msg.put("colorsito", player.getColorNave());
-
-							salas.get(node.get("params").asText()).sms(msg.toString());
 						}
+						
 					} else { // si no existe volvemos al JS para preguntar otro nombre
 						System.out.println("la sala no existe " + node.get("params").asText());
 
@@ -145,7 +155,12 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 						node.path("movement").get("rotRight").asBoolean(), node.path("push").asBoolean());
 				if (node.path("bullet").asBoolean()) {
 					Projectile projectile = new Projectile(player, this.projectileId.incrementAndGet());
-					salas.get(node.get("nomSal").asText()).addBalas(projectile.getId(), projectile);
+					try {
+						salas.get(node.get("nomSal").asText()).addBalas(projectile.getId(), projectile);
+					}catch(NullPointerException e) {
+						System.out.println(salas);
+						System.out.println(node.get("nomSal").asText());
+					}
 				}
 
 				break;
@@ -188,6 +203,15 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 			return false;
 		}
 	}
+	
+	public void eliminarSala(String n) {
+		try {
+			salas.remove(n);
+			System.out.println("La sala se elimina con exito");
+		}catch(NullPointerException e) {
+			System.out.println("La sala ya ha sido eliminada"); 
+		}
+	}
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
@@ -198,15 +222,23 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 		if (sala != null) {
 			synchronized (salas.get(sala)) {
 				salas.get(sala).removePlayer(player.getPlayerId());
-
-				ObjectNode msg = mapper.createObjectNode();
-				msg.put("event", "REMOVE PLAYER");
-				msg.put("id", player.getPlayerId());
-				/////////////// game.broadcast(msg.toString());
-				salas.get(sala).brct(msg.toString());
+				if(salas.get(sala).isEmpezada()) {
+					salas.get(sala).sg.removePlayer(player);
+					
+					ObjectNode msg = mapper.createObjectNode();
+					msg.put("event", "REMOVE PLAYER");
+					msg.put("id", player.getPlayerId());
+					/////////////// game.broadcast(msg.toString());
+					salas.get(sala).brct(msg.toString());
+				}
 
 				if (salas.get(sala).isVacia()) {
-					salas.remove(sala);
+					try {
+						salas.remove(sala);
+						System.out.println("La sala se elimina");
+					}catch(NullPointerException e){
+						System.out.println("La sala ya ha sido eliminada"); 
+					}
 				}
 			}
 		}

@@ -1,5 +1,6 @@
 package spacewar;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -24,6 +25,9 @@ public class SpacewarGame {
 	private final static long TICK_DELAY = 1000 / FPS;
 	public final static boolean DEBUG_MODE = true;
 	public final static boolean VERBOSE_MODE = true;
+	
+	private WebsocketGameHandler referencia;
+	private Sala salita;
 
 	ObjectMapper mapper = new ObjectMapper();
 	private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -33,13 +37,16 @@ public class SpacewarGame {
 	private Map<Integer, Projectile> projectiles = new ConcurrentHashMap<>();
 	private AtomicInteger numPlayers = new AtomicInteger();
 
-	public SpacewarGame() {
+	public SpacewarGame(WebsocketGameHandler h, Sala s) {
+		referencia = h;
+		salita = s;
 		// modos de juego
 	}
 
 	public synchronized void addPlayer(Player player) {
 		players.put(player.getSession().getId(), player);
-
+		player.resetVida();
+		player.resetPropulsion();
 		int count = numPlayers.getAndIncrement();
 		if (count == 0) {
 			// this.startGameLoop();
@@ -50,12 +57,18 @@ public class SpacewarGame {
 		return players.values();
 	}
 
-	public synchronized void removePlayer(Player player) {
-		players.remove(player.getSession().getId());
-
-		int count = this.numPlayers.decrementAndGet();
-		if (count == 0) {
-			// this.stopGameLoop();
+	public synchronized void removePlayer(Player player) throws IOException {
+		salita.removePlayer(player.getPlayerId());
+		try {
+			players.remove(player.getSession().getId());
+		
+			//int count = this.numPlayers.decrementAndGet();
+			if (this.players.size()<2) {
+				referencia.eliminarSala(salita.getNombreSala());
+				this.stopGameLoop();
+			}
+		}catch(NullPointerException e) {
+			
 		}
 	}
 
@@ -84,7 +97,7 @@ public class SpacewarGame {
 		}
 	}
 
-	public void broadcast(String message) {
+	public synchronized void broadcast(String message) throws IOException {
 		for (Player player : getPlayers()) {
 			try {
 				player.getSession().sendMessage(new TextMessage(message.toString()));
@@ -110,8 +123,10 @@ public class SpacewarGame {
 		Set<String> f = new HashSet<>();
 		boolean removeBullets = false;
 		boolean exitPlayer = false;
+		boolean haMuerto = false;
 
 		try {
+			msg.put("event", "MUERTEEE");
 			// Update players
 			for (Player player : getPlayers()) {
 				if (player.salir) {
@@ -144,11 +159,15 @@ public class SpacewarGame {
 					if ((projectile.getOwner().getPlayerId() != player.getPlayerId()) && player.intersect(projectile)) {
 						// System.out.println("Player " + player.getPlayerId() + " was hit!!!");
 						if (player.muerto()) {
+							haMuerto = true;
+							System.out.println("Muere : "+ player.getNombreNave());
 							f.add(player.getSession().getId());
+							msg.put("id", player.getPlayerId());
 						}
 						projectile.setHit(true);
 						break;
 					}
+					
 				}
 
 				ObjectNode jsonProjectile = mapper.createObjectNode();
@@ -171,19 +190,30 @@ public class SpacewarGame {
 				}
 				arrayNodeProjectiles.addPOJO(jsonProjectile);
 			}
-
-			if (removeBullets || exitPlayer) {
-				System.out.println("ELIMINO JUGADOR");
-				this.projectiles.keySet().removeAll(bullets2Remove);
-				this.players.keySet().removeAll(f);
-			}
-
+			
 			json.put("event", "GAME STATE UPDATE");
 			json.putPOJO("players", arrayNodePlayers); //// enviarle a los demas qu eha muerto
 			json.putPOJO("projectiles", arrayNodeProjectiles);
-
+			
 			this.broadcast(json.toString());
-			this.broadcast(msg.toString());
+			
+			if(haMuerto) {
+				this.broadcast(msg.toString());
+			}
+
+			if (removeBullets || exitPlayer) {
+				//System.out.println("ELIMINO JUGADOR");
+				this.projectiles.keySet().removeAll(bullets2Remove);
+				synchronized (players) {
+					this.players.keySet().removeAll(f);
+				}
+			}
+			
+			/*if(this.players.size()<1) {
+				//referencia a webgamehandler y borrar sala.
+				referencia.eliminarSala(salita.getNombreSala());
+			}*/
+
 
 		} catch (Throwable ex) {
 

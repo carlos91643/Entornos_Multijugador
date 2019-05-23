@@ -12,13 +12,24 @@ var unirseBtn= true;
 var enPartida=false;
 var enSala = false;
 
-function pedirNombre(){
+/*function pedirNombre(){
 	do
 	{
 		namePlayer = prompt("Inserta el nombre de tu nave: ", "nave1"); //esta función nos permite pedir al usuario un nombre, que se guardará en la variable namePlayer.
-	} while(namePlayer == "nave1"|| namePlayer == "null");
+	} while(namePlayer == " "|| namePlayer == "null");
 	color = colores[Math.floor(Math.random() * 4)];
 	style = { font: "bold 10px Arial", fill: color, boundsAlignH: "center", boundsAlignV: "middle" };
+}*/
+
+function pedirNombre(){
+    do
+    {
+        namePlayer = prompt("Inserta el nombre de tu nave: ", "nave1"); //esta función nos permite pedir al usuario un nombre, que se guardará en la variable namePlayer.
+       
+    } while(namePlayer == " "|| namePlayer == "null" || namePlayer == ""|| namePlayer == null  );
+   
+    color = colores[Math.floor(Math.random() * 4)];
+    style = { font: "bold 10px Arial", fill: color, boundsAlignH: "center", boundsAlignV: "middle" };
 }
 
 function nomSala(){

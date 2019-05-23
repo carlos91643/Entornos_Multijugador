@@ -64,6 +64,10 @@ window.onload = function() {
 			Console.log("¡¡¡TODOS LISTOS!!!")
 			Console.log("¡¡¡GOOO!!!")
 			break
+		case 'BOTON EMPEZAR':
+			Console.log("Eres el Leader, tu decides cuando empezar a jugar");
+			empezarBtn = true;
+			break;
 		case 'NEW ROOM' : //Una partida como tal, configuracion del espacio de juego, nº jugadores, etc... Es donde tenemos que hacer toda la chicha
 			if (game.global.DEBUG_MODE) {
 				console.log('[DEBUG] NEW ROOM message recieved')
@@ -73,7 +77,7 @@ window.onload = function() {
 					name : msg.room //Nombre de la habitacion o mapa
 			}
 			nameSala = msg.room
-			empezarBtn = true;			//provisional.
+			//empezarBtn = true;			//provisional.
 			
 			if (msg.duplicado == "yes"){
 				Console.log("La sala ya exixtía")
@@ -85,114 +89,149 @@ window.onload = function() {
 		case 'CHAT':
 			Console.log(msg.nombre.fontcolor(msg.colorsito) + " : " + msg.mensaje);
 			break
+		case 'SALA LLENA':
+			console.log("SALA LLENA PRHEMOOOH")
+			unirse();
+			break;
+		case 'MUERTEEE':
+			if (game.global.myPlayer.id == msg.id) {
+				enPartida = false;
+				game.global.myPlayer.liveSprite.destroy()
+				game.global.myPlayer.liveSprite2.destroy()
+				game.global.myPlayer.liveSprite3.destroy()
+				game.global.myPlayer.text.destroy()
+				game.global.myPlayer.push.destroy()
+				game.global.myPlayer.image.destroy()
+				//delete game.global.myPlayer
+				console.log("ME MATAAAAN") 
+				enSala = false;
+		        empezarBtn = false;
+		        
+		        crearBtn = true;
+		        unirseBtn = true;
+		        
+		        game.state.start('roomState')	
+			}else{
+				game.global.otherPlayers[msg.id].liveSprite.destroy()
+				game.global.otherPlayers[msg.id].liveSprite2.destroy()
+				game.global.otherPlayers[msg.id].liveSprite3.destroy()
+				game.global.otherPlayers[msg.id].texto.destroy()
+				game.global.otherPlayers[msg.id].image.destroy()
+				delete game.global.otherPlayers[msg.id]
+			}
+			break;
 		case 'GAME STATE UPDATE' :
 
 			if (game.global.DEBUG_MODE) {
 				console.log('[DEBUG] GAME STATE UPDATE message recieved')
 				console.dir(msg)
 			}
-			if (typeof game.global.myPlayer.image !== 'undefined') { //Si la imagen del jugador no está creada
-				
-				for (var player of msg.players) {
+				//if (typeof game.global.myPlayer.image !== 'undefined') { //Si la imagen del jugador no está creada
+			//if (enPartida) {
+				if (typeof game.global.myPlayer.image !== 'undefined') {
+					for (var player of msg.players) {
+						
+						if (game.global.myPlayer.id == player.id) { //Si la id que estamos usando coincide con la id del array de jugadores
+							game.global.myPlayer.image.x = player.posX
+							game.global.myPlayer.image.y = player.posY
+							game.global.myPlayer.image.angle = player.facingAngle
+							game.global.myPlayer.vida = player.vida;
+							////////////////////////////////
+							pintarVidas(game.global.myPlayer,player);
+							///////////////////////////////
+							game.global.myPlayer.text.x = player.posX -10;
+							game.global.myPlayer.text.y = player.posY -35;
+							
+							game.global.myPlayer.push.x = player.posX -10;
+							game.global.myPlayer.push.y = player.posY -45;
+							
+							if(player.push > 0){
+								game.global.myPlayer.push.setText(player.push);﻿﻿
+							}
+							
+							console.log(game.global.myPlayer.vida);
+							
+							/*if(game.global.myPlayer.vida == 0){
+								enPartida = false;
+								game.global.myPlayer.liveSprite.destroy()
+								game.global.myPlayer.liveSprite2.destroy()
+								game.global.myPlayer.liveSprite3.destroy()
+								game.global.myPlayer.text.destroy()
+								game.global.myPlayer.push.destroy()
+								game.global.myPlayer.image.destroy()
+								//delete game.global.myPlayer
+								console.log("ME MATAAAAN") 
+								enSala = false;
+						        empezarBtn = false;
+						        
+						        crearBtn = true;
+						        unirseBtn = true;
+						        
+						        game.state.start('roomState')
+							}*/
+							
+						} else {
+							if (typeof game.global.otherPlayers[player.id] == 'undefined' && player.nombre !== 'undefined') { //Si hay otros jugadores distintos al de mi id que no estan definidos, lo creamos.
+								game.global.otherPlayers[player.id] = {
+										image : game.add.sprite(player.posX, player.posY, 'spacewar', player.shipType),
+										vida : player.vida,
+										liveSprite : game.add.sprite(0, 0, 'live'),
+										liveSprite2 : game.add.sprite(0, 0, 'live'),
+										liveSprite3 : game.add.sprite(0, 0, 'live'),
+										texto : game.add.text(0, 0, player.nombre, style) //tocaaaaaar
+								}
+								game.global.otherPlayers[player.id].image.anchor.setTo(0.5, 0.5)
+								game.global.otherPlayers[player.id].liveSprite.scale.setTo(0.02, 0.02)
+								game.global.otherPlayers[player.id].liveSprite2.scale.setTo(0.02, 0.02)
+								game.global.otherPlayers[player.id].liveSprite3.scale.setTo(0.02, 0.02)
+								
+								game.global.otherPlayers[player.id].texto.addColor(player.color,0);
+								
+							} else { //Si el jugador ya existe
+								if(player.nombre !== 'undefined'){
+									game.global.otherPlayers[player.id].image.x = player.posX
+									game.global.otherPlayers[player.id].image.y = player.posY
+									game.global.otherPlayers[player.id].image.angle = player.facingAngle
+									game.global.otherPlayers[player.id].vida = player.vida;
+									
+									pintarVidas(game.global.otherPlayers[player.id],player);
+									
+									game.global.otherPlayers[player.id].texto.x = player.posX -10;
+									game.global.otherPlayers[player.id].texto.y = player.posY -35;
+								}
+							}
+							/*if(game.global.otherPlayers[player.id].vida == 0){
+								game.global.otherPlayers[player.id].liveSprite.destroy()
+								game.global.otherPlayers[player.id].liveSprite2.destroy()
+								game.global.otherPlayers[player.id].liveSprite3.destroy()
+								game.global.otherPlayers[player.id].texto.destroy()
+								game.global.otherPlayers[player.id].image.destroy()
+								delete game.global.otherPlayers[player.id]
+							}*/
+						}
+					}
 					
-					if (game.global.myPlayer.id == player.id) { //Si la id que estamos usando coincide con la id del array de jugadores
-						game.global.myPlayer.image.x = player.posX
-						game.global.myPlayer.image.y = player.posY
-						game.global.myPlayer.image.angle = player.facingAngle
-						game.global.myPlayer.vida = player.vida;
-						////////////////////////////////
-						pintarVidas(game.global.myPlayer,player);
-						///////////////////////////////
-						game.global.myPlayer.text.x = player.posX -10;
-						game.global.myPlayer.text.y = player.posY -35;
-						
-						game.global.myPlayer.push.x = player.posX -10;
-						game.global.myPlayer.push.y = player.posY -45;
-						
-						if(player.push > 0){
-							game.global.myPlayer.push.setText(player.push);﻿﻿
-						}
-						
-						if(game.global.myPlayer.vida == 0){
-							game.global.myPlayer.liveSprite.destroy()
-							game.global.myPlayer.liveSprite2.destroy()
-							game.global.myPlayer.liveSprite3.destroy()
-							game.global.myPlayer.text.destroy()
-							game.global.myPlayer.push.destroy()
-							game.global.myPlayer.image.destroy() 
-							delete game.global.myPlayer
-							
-							enSala = false;
-					        empezarBtn = false;
-					        enPartida = false;
-					        
-					        crearBtn = true;
-					        unirseBtn = true;
-					        
-					        game.state.start('roomState')
-						}
-						
-					} else {
-						if (typeof game.global.otherPlayers[player.id] == 'undefined' && player.nombre !== 'undefined') { //Si hay otros jugadores distintos al de mi id que no estan definidos, lo creamos.
-							game.global.otherPlayers[player.id] = {
-									image : game.add.sprite(player.posX, player.posY, 'spacewar', player.shipType),
-									vida : player.vida,
-									liveSprite : game.add.sprite(0, 0, 'live'),
-									liveSprite2 : game.add.sprite(0, 0, 'live'),
-									liveSprite3 : game.add.sprite(0, 0, 'live'),
-									texto : game.add.text(0, 0, player.nombre, style) //tocaaaaaar
+					for (var projectile of msg.projectiles) { //Aqui creamos los proyectiles. 
+						if (projectile.isAlive) { //directamente los creo todos y los cargo, pero siendo invisibles. Cuando disparo, lo que hacemos es mostrarlas o quitarlas.
+							game.global.projectiles[projectile.id].image.x = projectile.posX
+							game.global.projectiles[projectile.id].image.y = projectile.posY
+							if (game.global.projectiles[projectile.id].image.visible === false) {
+								game.global.projectiles[projectile.id].image.angle = projectile.facingAngle //No se actualiza el angulo, porque los proyectiles van en linea recta. 
+								game.global.projectiles[projectile.id].image.visible = true
 							}
-							game.global.otherPlayers[player.id].image.anchor.setTo(0.5, 0.5)
-							game.global.otherPlayers[player.id].liveSprite.scale.setTo(0.02, 0.02)
-							game.global.otherPlayers[player.id].liveSprite2.scale.setTo(0.02, 0.02)
-							game.global.otherPlayers[player.id].liveSprite3.scale.setTo(0.02, 0.02)
-							
-							game.global.otherPlayers[player.id].texto.addColor(player.color,0);
-							
-						} else { //Si el jugador ya existe
-							if(player.nombre !== 'undefined'){
-								game.global.otherPlayers[player.id].image.x = player.posX
-								game.global.otherPlayers[player.id].image.y = player.posY
-								game.global.otherPlayers[player.id].image.angle = player.facingAngle
-								game.global.otherPlayers[player.id].vida = player.vida;
-								
-								pintarVidas(game.global.otherPlayers[player.id],player);
-								
-								game.global.otherPlayers[player.id].texto.x = player.posX -10;
-								game.global.otherPlayers[player.id].texto.y = player.posY -35;
+						} else {
+							if (projectile.isHit) { //Si el proyectil ha golpeado algo. Habría que hacer comprobaciones de que se ha golpeado, un muro, otra nave...
+								// we load explosion
+								let explosion = game.add.sprite(projectile.posX, projectile.posY, 'explosion')
+								explosion.animations.add('explosion')
+								explosion.anchor.setTo(0.5, 0.5)
+								explosion.scale.setTo(2, 2)
+								explosion.animations.play('explosion', 15, false, true)
 							}
-						}
-						if(game.global.otherPlayers[player.id].vida == 0){
-							game.global.otherPlayers[player.id].liveSprite.destroy()
-							game.global.otherPlayers[player.id].liveSprite2.destroy()
-							game.global.otherPlayers[player.id].liveSprite3.destroy()
-							game.global.otherPlayers[player.id].texto.destroy()
-							game.global.otherPlayers[player.id].image.destroy()
-							delete game.global.otherPlayers[player.id]
+							game.global.projectiles[projectile.id].image.visible = false
 						}
 					}
-				}
-				
-				for (var projectile of msg.projectiles) { //Aqui creamos los proyectiles. 
-					if (projectile.isAlive) { //directamente los creo todos y los cargo, pero siendo invisibles. Cuando disparo, lo que hacemos es mostrarlas o quitarlas.
-						game.global.projectiles[projectile.id].image.x = projectile.posX
-						game.global.projectiles[projectile.id].image.y = projectile.posY
-						if (game.global.projectiles[projectile.id].image.visible === false) {
-							game.global.projectiles[projectile.id].image.angle = projectile.facingAngle //No se actualiza el angulo, porque los proyectiles van en linea recta. 
-							game.global.projectiles[projectile.id].image.visible = true
-						}
-					} else {
-						if (projectile.isHit) { //Si el proyectil ha golpeado algo. Habría que hacer comprobaciones de que se ha golpeado, un muro, otra nave...
-							// we load explosion
-							let explosion = game.add.sprite(projectile.posX, projectile.posY, 'explosion')
-							explosion.animations.add('explosion')
-							explosion.anchor.setTo(0.5, 0.5)
-							explosion.scale.setTo(2, 2)
-							explosion.animations.play('explosion', 15, false, true)
-						}
-						game.global.projectiles[projectile.id].image.visible = false
-					}
-				}
+				//}
 			}
 			break
 		case 'REMOVE PLAYER' : //se elimina un jugador, ya sea porque se ha ido de la partida
@@ -220,7 +259,7 @@ window.onload = function() {
 		game.global.myPlayer.liveSprite3.destroy()
 		game.global.myPlayer.push.destroy()
 		game.global.myPlayer.text.destroy()
-		//game.global.myPlayer.image.destroy()
+		game.global.myPlayer.image.visible = false
 		//delete game.global.myPlayer
 	}
 	
@@ -265,7 +304,7 @@ window.onload = function() {
 		do
     	{
     		nameSala = prompt("Inserta el nombre de la Sala: ", "Sala1");
-    	} while(name == "null");
+    	} while(nameSala == " "|| nameSala == "null" || nameSala == ""|| nameSala == null);
         var object = {
         	event: 'UNIRSE',
             params: nameSala
@@ -292,11 +331,23 @@ window.onload = function() {
 	    });
 	    
 	    $('#crear-btn').click(function() {
+	    	
+	    	$('#crear-btn').css("display", "none");
+	    	
+	    	$('#unirse-btn').css("display", "none");
+	    	
+	    	$('#buscar-btn').css("display", "none");
+	    	
+	    	$('#modoA-btn').css("display", "inline");
+	    	
+	    	$('#modoB-btn').css("display", "inline");
+	    	
+	    	/*
 	    	if(crearBtn){
 		    	do
 		    	{
 		    		nameSala = prompt("Inserta el nombre de tu Sala: ", "Sala1");
-		    	} while(nameSala == "null" || nameSala == " ");
+		    	} while(nameSala == " "|| nameSala == "null" || nameSala == ""|| nameSala == null);
 		        var object = {
 		        	event: 'CREAR',
 		            params: nameSala
@@ -308,9 +359,71 @@ window.onload = function() {
 		        unirseBtn = false;
 		        enSala = true;
 	    	}
+	    	*/
+	    	
+	    });
+	    
+	    $('#modoA-btn').click(function() {
+	    	$('#modoA-btn').css("display", "none");
+	    	
+	    	$('#modoB-btn').css("display", "none");
+	    	
+	    	if(crearBtn){
+		    	do
+		    	{
+		    		nameSala = prompt("Inserta el nombre de tu Sala: ", "Sala1");
+		    	} while(nameSala == " "|| nameSala == "null" || nameSala == ""|| nameSala == null);
+		        var object = {
+		        	event: 'CREAR',
+		            params: nameSala,
+		            modo: 'A'
+		        }
+	
+		        game.global.socket.send(JSON.stringify(object));
+		        
+		        crearBtn = false;
+		        unirseBtn = false;
+		        enSala = true;
+	    	}
+	    });
+	    
+	    $('#modoB-btn').click(function() {
+	    	$('#modoA-btn').css("display", "none");
+	    	
+	    	$('#modoB-btn').css("display", "none");
+	    	
+	    	if(crearBtn){
+		    	do
+		    	{
+		    		nameSala = prompt("Inserta el nombre de tu Sala: ", "Sala1");
+		    	} while(nameSala == " "|| nameSala == "null" || nameSala == ""|| nameSala == null);
+		        var object = {
+		        	event: 'CREAR',
+		            params: nameSala,
+		            modo: 'B'
+		        }
+	
+		        game.global.socket.send(JSON.stringify(object));
+		        
+		        crearBtn = false;
+		        unirseBtn = false;
+		        enSala = true;
+	    	}
 	    });
 	    
 	    $('#unirse-btn').click(function() {
+	    	$('#crear-btn').css("display", "none");
+	    	
+	    	$('#empezar-btn').css("display", "none");
+	    	
+	    	$('#unirse-btn').css("display", "none");
+	    	
+	    	$('#buscar-btn').css("display", "none");
+	    	
+	    	$('#modoA-btn').css("display", "none");
+	    	
+	    	$('#modoB-btn').css("display", "none");
+	    	
 	    	if(unirseBtn){
 	    		unirse();
 		        
@@ -320,8 +433,19 @@ window.onload = function() {
 	    	}
 	    });
 	    
-	    $('#empezar-btn').click(function() { 
+	    $('#empezar-btn').click(function() {
 	    	if(empezarBtn){
+	    		
+	    		$('#empezar-btn').css("display", "none");
+		    	
+		    	$('#unirse-btn').css("display", "none");
+		    	
+		    	$('#buscar-btn').css("display", "none");
+		    	
+		    	$('#modoA-btn').css("display", "none");
+		    	
+		    	$('#modoB-btn').css("display", "none");
+	    		
 		        var object = {
 		        	event: 'EMPEZAR',
 		            params: nameSala
@@ -338,8 +462,16 @@ window.onload = function() {
 	        
 	    });
 	    
-	    $('#salir-btn').click(function() { 
-	    	if(enSala){
+	    $('#salir-btn').click(function() {
+	    	$('#crear-btn').css("display", "inline");
+	    	
+	    	$('#empezar-btn').css("display", "inline");
+	    	
+	    	$('#unirse-btn').css("display", "inline");
+	    	
+	    	$('#buscar-btn').css("display", "inline");
+	    	
+	    	if(enPartida){
 		        var object = {
 		        	event: 'SALIR',
 		            params: nameSala,

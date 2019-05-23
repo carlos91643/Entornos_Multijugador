@@ -44,10 +44,21 @@ public class SpaceObject {
 		this.velX *= delta;
 		this.velY *= delta;
 	}
-
+	
 	public void applyVelocity2Position() {
 		this.posX += this.velX;
 		this.posY += this.velY;
+	}
+
+	public void applyVelocity2Position2() {
+		double x = this.posX + this.velX;
+		double y = this.posY + this.velY;
+		if(x>0 && x<1024) {
+			this.posX = x;
+		}
+		if(y>0 && y<600) {
+			this.posY = y;
+		}
 	}
 
 	public int getCollisionFactor() {
