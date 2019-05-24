@@ -5,7 +5,7 @@ var namePlayer;
 var nameSala = " ";
 var color = "#ffffff";
 var style;
-var colores= ["#E10000", "#EA00C3", "#10C5F5", "#10F510"];
+var colores= ["#FF0000", "#FF8B00", "#FFE400", "#87FF00", "#00FF9B", "#00C9FF", "#0046FF", "#C38BFF", "#FF8BF6", "#FF8BC1","#FF8B8B", "#FFFFFF"];
 var empezarBtn= false;
 var crearBtn= true;
 var unirseBtn= true;

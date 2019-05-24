@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8" />
+
+<!-- Título de la página -->
+<title>SpaceWar!</title>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+
+<!-- Cargamos los archivos JS -->
+<script src="scripts/phaser.min.js"></script>
+<script src="src/states/boot.js"></script>
+<script src="src/states/preload.js"></script>
+<script src="src/states/menu.js"></script>
+<script src="src/states/lobby.js"></script>
+<script src="src/states/matchmaking.js"></script>
+<script src="src/states/room.js"></script>
+<script src="src/states/game.js"></script>
+<script src="src/index.js"></script>
+
+<link
+      href="https://fonts.googleapis.com/css?family=Montserrat:600"
+      rel="stylesheet"
+/>
+<link rel="stylesheet" href= "src/style.css">
+</head>
+
+<body>
+	<div id="game">
+      <div id="botons">
+        <button id="crear-btn">Crear</button>
+        <button id="buscar-btn">Match-Making</button>
+        <button id="unirse-btn">Unirse</button>
+        <button id="modoA-btn" style = "display:none;">Classic</button>
+        <button id="modoB-btn" style = "display:none;">Bttl.Royale</button>
+      </div>
+
+      <!-- div donde ubicaremos el juego -->
+      <div id="controles">
+      	<img src="assets/images/teclado.png" style = "width: 30%; " >
+      </div>
+      
+      <div id="gameDiv"></div>
+
+      <div id="chat">
+        <button id="empezar-btn">Empezar</button>
+
+        <!-- console.log -->
+        <div id="console-container">
+          <div id="console"></div>
+          <div id="input-send">
+            <input
+              type="text"
+              name="message"
+              id="message"
+              placeholder="Message"
+              maxlength="80"
+            />
+            <button id="send-btn">Send</button>
+          </div>
+        </div>
+        <!-- console.log -->
+
+        <button id="salir-btn">Salir</button>
+      </div>
+    </div>
+</body>
+</html>

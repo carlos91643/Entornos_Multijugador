@@ -164,9 +164,10 @@ public class SpacewarGame {
 				for (Player player : getPlayers()) {///////////// CONCURRENCIAAAAAAAAAAAAAA!!!!!!!!!!!!!!
 					if ((projectile.getOwner().getPlayerId() != player.getPlayerId()) && player.intersect(projectile)) {
 						// System.out.println("Player " + player.getPlayerId() + " was hit!!!");
-						projectile.getOwner().puntuacion+= 10;
+						
 						if (player.muerto()) {
 							projectile.getOwner().puntuacion+= 30;
+							System.out.println("He matado al jugador" + projectile.getOwner().puntuacion);
 							Puntos uwu = new Puntos(player.getPlayerId(), player.getSession().getId(), player.getNombreNave(), player.getColorNave(), player.getSalaActual(), player.puntuacion);
 							// comprobacion blablabla
 							referencia.rank.add(uwu);
@@ -175,6 +176,15 @@ public class SpacewarGame {
 							System.out.println("Muere : "+ player.getNombreNave());
 							f.add(player.getSession().getId());
 							msg.put("id", player.getPlayerId());
+						}
+						else {
+							projectile.getOwner().puntuacion+= 10;
+							System.out.println("He dado al jugador");
+							
+							
+							
+							
+							
 						}
 						projectile.setHit(true);
 						break;
