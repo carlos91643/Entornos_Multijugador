@@ -27,7 +27,7 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 	/////
 	private ConcurrentHashMap<WebSocketSession, Player> sessions = new ConcurrentHashMap<>();
 	private ConcurrentHashMap<String, Sala> salas = new ConcurrentHashMap<>();
-	public List<Puntos> rank = new ArrayList<>();
+	public ArrayList<Puntos> rank = new ArrayList<>();
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {

@@ -2,6 +2,8 @@ package spacewar;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -11,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
 
 import org.springframework.web.socket.TextMessage;
 
@@ -59,15 +62,37 @@ public class SpacewarGame {
 	}
 
 	public synchronized void removePlayer(Player player) throws IOException {
-		Puntos uwu = new Puntos(player.getPlayerId(), player.getSession().getId(), player.getNombreNave(), player.getColorNave(), player.getSalaActual(), player.puntuacion);
+		Puntos configuracionJugador = new Puntos(player.getPlayerId(), player.getSession().getId(), player.getNombreNave(), player.getColorNave(), player.getSalaActual(), player.puntuacion);
 		// comprobacion blablabla pdf 618
-		if(referencia.rank.isEmpty())
-			referencia.rank.add(uwu);
-		else {
-			Iterator<Puntos> it = referencia.rank.iterator();
-			while(it.hasNext()) {
-				
+		Iterator<Puntos> it = referencia.rank.iterator();
+		
+		if(referencia.rank.isEmpty()) {
+			referencia.rank.add(configuracionJugador);
+		} else {
+			if(referencia.rank.size()==10) { //Si esta llena recorre
+				while (it.hasNext()) { 
+					//if() //que recorra que compare los id y los puntos. Si no esta id que compruebe si los puntos son mayores que alguno, si es mayor que lo inserte, si no fuera
+				}
+			}else {
+				while(it.hasNext()) { //si no esta llena
+					Puntos jugadorAux = it.next(); //axuliar de la siguiente posicion porque lo vamos a usar mucho.
+					if((configuracionJugador.id.equals(jugadorAux.id)) && (configuracionJugador.puntos > jugadorAux.puntos)) { //si el id es igual al jugador siguiente y los puntos son mayores insertalo
+						referencia.rank.add(configuracionJugador);
+						
+						//Sort de un array list  ORDENAME LA LISTA
+						Collections.sort(referencia.rank, new Comparator <Puntos>() { 
+							public int compare (Puntos configuracionJugador, Puntos jugadorAux) {
+								return configuracionJugador.puntos - jugadorAux.puntos;
+							}
+						});
+					}else {  //si no esta llena y no son iguales los id , añademe el jugador y luego ordena 
+						
+					}
+					
+				}
 			}
+			
+			
 		}
 		
 		salita.removePlayer(player.getPlayerId());
