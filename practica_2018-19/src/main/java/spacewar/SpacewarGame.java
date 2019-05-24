@@ -3,6 +3,7 @@ package spacewar;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,7 +61,14 @@ public class SpacewarGame {
 	public synchronized void removePlayer(Player player) throws IOException {
 		Puntos uwu = new Puntos(player.getPlayerId(), player.getSession().getId(), player.getNombreNave(), player.getColorNave(), player.getSalaActual(), player.puntuacion);
 		// comprobacion blablabla pdf 618
-		referencia.rank.add(uwu);
+		if(referencia.rank.isEmpty())
+			referencia.rank.add(uwu);
+		else {
+			Iterator<Puntos> it = referencia.rank.iterator();
+			while(it.hasNext()) {
+				
+			}
+		}
 		
 		salita.removePlayer(player.getPlayerId());
 		try {
