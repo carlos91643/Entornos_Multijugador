@@ -12,6 +12,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class WebsocketGameHandler extends TextWebSocketHandler {
@@ -24,6 +27,7 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 	/////
 	private ConcurrentHashMap<WebSocketSession, Player> sessions = new ConcurrentHashMap<>();
 	private ConcurrentHashMap<String, Sala> salas = new ConcurrentHashMap<>();
+	public List<Puntos> rank = new ArrayList<>();
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -73,7 +77,7 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 					duplicado = "yes";
 				}
 
-				Sala salita = new Sala(nRoom, this);
+				Sala salita = new Sala(nRoom, this, node.get("modo").asText()); //"Sala1", referencia al handler y "A"
 				salita.addPlayer(player.getPlayerId(), player);
 				salas.putIfAbsent(nRoom, salita);
 
@@ -100,18 +104,23 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 								player.getSession().sendMessage(new TextMessage(msg.toString()));
 							} else {
 								System.out.println("nos unimos a la sala " + node.get("params").asText());
-
-								salas.get(node.get("params").asText()).addPlayer(player.getPlayerId(), player); // nos
-																												// unimos a
-																												// la sala
-																												// con éxito
-
+								salas.get(node.get("params").asText()).addPlayer(player.getPlayerId(), player);
+								
 								msg.put("event", "CHAT");
 								msg.put("nombre", player.getNombreNave());
 								msg.put("mensaje", "Hey me he unido a esta sala");
 								msg.put("colorsito", player.getColorNave());
 
 								salas.get(node.get("params").asText()).sms(msg.toString());
+								
+								if (salas.get(node.get("params").asText()).isFull()) {
+									System.out.println("EMPEZAMOS PERTIDA");
+									synchronized (salas.get(node.get("params").asText())) {
+										salas.get(node.get("params").asText()).listo();
+										// ------------------------------ aquí algún jugador podría salir de la sala
+										salas.get(node.get("params").asText()).empezar();
+									}
+								}
 							}
 							
 						}else { // la partida ya ha empezado, así que busca otra
@@ -130,13 +139,18 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 				}
 				break;
 			case "SALIR":
-				synchronized (salas.get(node.get("params").asText())) {
-
-					System.out.println("######################### ME QUIERO IR");
-					System.out.println("NOMBRE SALA: " + node.get("params").asText());
-					
-					player.salir = true;
-					player.vida = 0;
+				try {
+					synchronized (salas.get(node.get("params").asText())) {
+	
+						System.out.println("######################### ME QUIERO IR");
+						System.out.println("NOMBRE SALA: " + node.get("params").asText());
+						
+						player.salir = true;
+						player.vida = 0;
+					}
+				}catch(NullPointerException e) {
+					//la sala ya se eliminó así que gg
+				}
 					/*salas.get(node.get("params")).removePlayer(player.getPlayerId());
 
 					msg.put("event", "REMOVE PLAYER");
@@ -146,7 +160,6 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 					if (salas.get(node.get("params")).isVacia()) {
 						salas.remove(node.get("params"));
 					}*/
-				}
 				break;
 			case "UPDATE MOVEMENT":
 				player.loadMovement(node.path("movement").get("thrust").asBoolean(),

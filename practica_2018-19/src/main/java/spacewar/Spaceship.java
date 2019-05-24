@@ -10,7 +10,9 @@ public class Spaceship extends SpaceObject {
 	private static final double SPACE_FRICTION = 0.95;
 	public int vida = 3;
 	public int municion = 10;
+	public int prpMax = 100;
 	public int propulsion = 100;
+	public int puntuacion = 0;
 	public boolean salir = false;
 	
 	
@@ -31,7 +33,7 @@ public class Spaceship extends SpaceObject {
 	}
 
 	public void resetPropulsion() {
-		this.propulsion = 100;
+		this.propulsion = prpMax;
 	}
 
 	class LastMovement {

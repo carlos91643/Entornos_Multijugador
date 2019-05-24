@@ -15,6 +15,7 @@ public class Sala {
 	private boolean lleno = false;
 	private boolean vacia = true;
 	private boolean empezada = false;
+	private int prop = 100;
 	
 	
 	public boolean isEmpezada() {
@@ -42,6 +43,7 @@ public class Sala {
 		}
 		vacia = false;
 		p.setSalaActual(nombreSala);
+		p.prpMax = prop;
 		jugadores.putIfAbsent(id, p);
 		if(jugadores.size()==numMax) {
 			lleno = true;
@@ -103,20 +105,37 @@ public class Sala {
 	}
 
 	public boolean isFull() {
-		if(jugadores.size()==numMax) {
+		/*if(jugadores.size()==numMax) {
 			return true;
 		}else {
 			return false;
-		}
+		}*/
+		return jugadores.size()==numMax;
 	}
 	
 	public boolean isVacia() {
 		return vacia;
 	}
 	
-	public Sala(String nombre, WebsocketGameHandler h) {
+	public Sala(String nombre, WebsocketGameHandler h, String mode) {
 		this.nombreSala = nombre;
 		this.sg = new SpacewarGame(h,this);
+		
+		switch (mode){
+		case "A":
+			numMax = 2;
+			prop = 50;
+			System.out.println("Modo de juego A");
+			break;
+		case "B":
+			numMax = 6;
+			prop = 200;
+			System.out.println("Modo de juego B");
+			break;
+		default:
+			System.out.println("NO RECIBE BIEN EL MODO!!!");
+			break;
+		}
 	}
 	
 	public void brct(String msi) throws IOException {

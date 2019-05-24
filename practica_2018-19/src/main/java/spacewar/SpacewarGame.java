@@ -58,17 +58,22 @@ public class SpacewarGame {
 	}
 
 	public synchronized void removePlayer(Player player) throws IOException {
+		Puntos uwu = new Puntos(player.getPlayerId(), player.getSession().getId(), player.getNombreNave(), player.getColorNave(), player.getSalaActual(), player.puntuacion);
+		// comprobacion blablabla pdf 618
+		referencia.rank.add(uwu);
+		
 		salita.removePlayer(player.getPlayerId());
 		try {
 			players.remove(player.getSession().getId());
 		
 			//int count = this.numPlayers.decrementAndGet();
 			if (this.players.size()<2) {
-				referencia.eliminarSala(salita.getNombreSala());
+				System.out.println("se acabó la partida, procedemos a eliminar la sala");
 				this.stopGameLoop();
+				referencia.eliminarSala(salita.getNombreSala());
 			}
 		}catch(NullPointerException e) {
-			
+			System.out.println("SE INTENTA ELIMINAR A ALGUIEN QUE YA HA SIDO ELIMINADO");
 		}
 	}
 
@@ -147,6 +152,7 @@ public class SpacewarGame {
 				jsonPlayer.put("nombre", player.getNombreNave());
 				jsonPlayer.put("color", player.getColorNave());
 				jsonPlayer.put("push", player.getPropulsion());
+				jsonPlayer.put("points", player.puntuacion);
 				arrayNodePlayers.addPOJO(jsonPlayer);
 			}
 
@@ -158,7 +164,13 @@ public class SpacewarGame {
 				for (Player player : getPlayers()) {///////////// CONCURRENCIAAAAAAAAAAAAAA!!!!!!!!!!!!!!
 					if ((projectile.getOwner().getPlayerId() != player.getPlayerId()) && player.intersect(projectile)) {
 						// System.out.println("Player " + player.getPlayerId() + " was hit!!!");
+						projectile.getOwner().puntuacion+= 10;
 						if (player.muerto()) {
+							projectile.getOwner().puntuacion+= 30;
+							Puntos uwu = new Puntos(player.getPlayerId(), player.getSession().getId(), player.getNombreNave(), player.getColorNave(), player.getSalaActual(), player.puntuacion);
+							// comprobacion blablabla
+							referencia.rank.add(uwu);
+							
 							haMuerto = true;
 							System.out.println("Muere : "+ player.getNombreNave());
 							f.add(player.getSession().getId());
@@ -206,6 +218,11 @@ public class SpacewarGame {
 				this.projectiles.keySet().removeAll(bullets2Remove);
 				synchronized (players) {
 					this.players.keySet().removeAll(f);
+					if (this.players.size()<2) {
+						System.out.println("se acabó la partida, procedemos a eliminar la sala");
+						this.stopGameLoop();
+						referencia.eliminarSala(salita.getNombreSala());
+					}
 				}
 			}
 			

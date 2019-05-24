@@ -59,6 +59,7 @@ window.onload = function() {
 			unirse();
 			break
 		case 'LISTO':
+			$('#empezar-btn').css("display", "none");
 			game.state.start('gameState')
 			enPartida = true;
 			Console.log("¡¡¡TODOS LISTOS!!!")
@@ -101,6 +102,7 @@ window.onload = function() {
 				game.global.myPlayer.liveSprite3.destroy()
 				game.global.myPlayer.text.destroy()
 				game.global.myPlayer.push.destroy()
+				game.global.myPlayer.puntos.destroy()
 				game.global.myPlayer.image.destroy()
 				//delete game.global.myPlayer
 				console.log("ME MATAAAAN") 
@@ -144,6 +146,10 @@ window.onload = function() {
 							
 							game.global.myPlayer.push.x = player.posX -10;
 							game.global.myPlayer.push.y = player.posY -45;
+							
+							game.global.myPlayer.puntos.x = player.posX -10;
+							game.global.myPlayer.puntos.y = player.posY -55;
+							game.global.myPlayer.puntos.setText(player.points);
 							
 							if(player.push > 0){
 								game.global.myPlayer.push.setText(player.push);﻿﻿
@@ -258,6 +264,7 @@ window.onload = function() {
 		game.global.myPlayer.liveSprite2.destroy()
 		game.global.myPlayer.liveSprite3.destroy()
 		game.global.myPlayer.push.destroy()
+		game.global.myPlayer.puntos.destroy()
 		game.global.myPlayer.text.destroy()
 		game.global.myPlayer.image.visible = false
 		//delete game.global.myPlayer

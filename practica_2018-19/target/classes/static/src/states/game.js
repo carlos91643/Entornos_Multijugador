@@ -56,7 +56,10 @@ Spacewar.gameState.prototype = {
 		game.global.myPlayer.text.style.fill = color;
 		
 		game.global.myPlayer.push = game.add.text(0,0, "100", style);
-		game.global.myPlayer.push.style.fill = color;﻿
+		game.global.myPlayer.push.style.fill = color;
+		
+		game.global.myPlayer.puntos = game.add.text(0,0, "0", style);
+		game.global.myPlayer.puntos.style.fill = color;﻿
 		
 		console.log("preload image");
 	},
