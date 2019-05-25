@@ -6,6 +6,8 @@ var nameSala = " ";
 var color = "#ffffff";
 var style;
 var colores= ["#FF0000", "#FF8B00", "#FFE400", "#87FF00", "#00FF9B", "#00C9FF", "#0046FF", "#C38BFF", "#FF8BF6", "#FF8BC1","#FF8B8B", "#FFFFFF"];
+var randomPosX = [50, 210, 312, 70, 500];
+var randomPosY = [200, 120, 210, 600, 760];
 var empezarBtn= false;
 var crearBtn= true;
 var unirseBtn= true;

@@ -20,7 +20,8 @@ window.onload = function() {
 		socket : null,
 		myPlayer : new Object(),
 		otherPlayers : [], 
-		projectiles : []
+		projectiles : [],
+		powerUps : []
 	}
 
 	// WEBSOCKET CONFIGURATOR

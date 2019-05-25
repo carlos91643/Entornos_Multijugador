@@ -155,6 +155,8 @@ public class SpacewarGame {
 		ObjectNode msg = mapper.createObjectNode();
 		ArrayNode arrayNodePlayers = mapper.createArrayNode();
 		ArrayNode arrayNodeProjectiles = mapper.createArrayNode();
+		ArrayNode arrayNodePowerUps = mapper.createArrayNode();
+		
 
 		long thisInstant = System.currentTimeMillis();
 		Set<Integer> bullets2Remove = new HashSet<>();

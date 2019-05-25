@@ -21,6 +21,19 @@ Spacewar.gameState.prototype = {
 			let random = game.rnd.realInRange(0, 0.6);
 			sprite.scale.setTo(random, random)
 		}
+		//Cargamos los powerUps en un array
+		game.global.powerUps = new Array(5);
+		for(var i = 0; i<5; i++){ //Aquí cargamos los power ups, que solo serán visibles en el modo classic
+			game.global.powerUps[i] = {
+					image: game.add.sprite(randomPosX[i], randomPosY[i], 'push', 'push.png'),
+					id: i
+			}
+			
+			game.global.powerUps[i].image.scale.setTo(0.1,0.1)
+			
+		}
+		
+		
 
 		// We preload the bullets pool
 		game.global.proyectiles = new Array(this.maxProjectiles)
